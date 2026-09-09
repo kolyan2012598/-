@@ -1,5 +1,4 @@
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local VirtualUser = game:GetService("VirtualUser")
@@ -15,6 +14,7 @@ end
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KairoTechUI"
 screenGui.ResetOnSpawn = false
+screenGui.DisplayOrder = 999999 -- Выводим поверх всех стандартных интерфейсов
 screenGui.Parent = playerGui
 
 local THEME = {
@@ -47,7 +47,8 @@ mainFrame.Size = UDim2.new(0, 580, 0, 400)
 mainFrame.Position = UDim2.new(0.5, -290, 0.5, -200)
 mainFrame.BackgroundColor3 = THEME.BG
 mainFrame.BorderSizePixel = 0
-mainFrame.ClipsDescendants = true
+mainFrame.ClipsDescendants = false
+mainFrame.ZIndex = 10
 mainFrame.Parent = screenGui
 
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
@@ -55,32 +56,37 @@ local mainStroke = Instance.new("UIStroke", mainFrame)
 mainStroke.Color = THEME.BORDER
 mainStroke.Thickness = 1.5
 
--- Заголовок
+-- Шапка (Зона перетаскивания)
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 36)
+header.Size = UDim2.new(1, 0, 0, 38)
 header.BackgroundColor3 = THEME.HEADER
 header.BorderSizePixel = 0
+header.ZIndex = 11
 header.Parent = mainFrame
+
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
 
 local menuTitle = Instance.new("TextLabel")
 menuTitle.Size = UDim2.new(0.8, 0, 1, 0)
 menuTitle.Position = UDim2.new(0, 12, 0, 0)
 menuTitle.BackgroundTransparency = 1
-menuTitle.Text = "🔮 KAIROTECH MULTIHUB (Expanded)"
+menuTitle.Text = "🔮 KAIROTECH MULTIHUB (Working Click & Drag)"
 menuTitle.TextColor3 = THEME.TEXT_TITLE
 menuTitle.TextSize = 13
 menuTitle.Font = Enum.Font.GothamBold
 menuTitle.TextXAlignment = Enum.TextXAlignment.Left
+menuTitle.ZIndex = 12
 menuTitle.Parent = header
 
 -- Контейнер вкладок
 local tabContainer = Instance.new("ScrollingFrame")
-tabContainer.Size = UDim2.new(1, -20, 0, 32)
-tabContainer.Position = UDim2.new(0, 10, 0, 42)
+tabContainer.Size = UDim2.new(1, -20, 0, 34)
+tabContainer.Position = UDim2.new(0, 10, 0, 44)
 tabContainer.BackgroundTransparency = 1
 tabContainer.BorderSizePixel = 0
 tabContainer.ScrollBarThickness = 2
 tabContainer.CanvasSize = UDim2.new(1.5, 0, 0, 0)
+tabContainer.ZIndex = 12
 tabContainer.Parent = mainFrame
 
 local tabLayout = Instance.new("UIListLayout", tabContainer)
@@ -98,6 +104,7 @@ local function createTabBtn(text, order)
 	btn.TextSize = 10
 	btn.Font = Enum.Font.GothamBold
 	btn.LayoutOrder = order
+	btn.ZIndex = 13
 	btn.Parent = tabContainer
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 	return btn
@@ -113,12 +120,13 @@ local tabBtns = {
 
 local function createContentFrame()
 	local frame = Instance.new("ScrollingFrame")
-	frame.Size = UDim2.new(1, -20, 1, -88)
-	frame.Position = UDim2.new(0, 10, 0, 80)
+	frame.Size = UDim2.new(1, -20, 1, -92)
+	frame.Position = UDim2.new(0, 10, 0, 84)
 	frame.BackgroundTransparency = 1
 	frame.BorderSizePixel = 0
 	frame.ScrollBarThickness = 3
 	frame.Visible = false
+	frame.ZIndex = 12
 	frame.Parent = mainFrame
 	
 	local list = Instance.new("UIListLayout", frame)
@@ -129,7 +137,7 @@ end
 
 local function createToggle(text, order, parent)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0.99, 0, 0, 32)
+	btn.Size = UDim2.new(0.98, 0, 0, 34)
 	btn.BackgroundColor3 = THEME.PANEL
 	btn.BorderSizePixel = 0
 	btn.Text = "   " .. text .. ":  ВЫКЛ"
@@ -138,6 +146,7 @@ local function createToggle(text, order, parent)
 	btn.Font = Enum.Font.GothamBold
 	btn.TextXAlignment = Enum.TextXAlignment.Left
 	btn.LayoutOrder = order
+	btn.ZIndex = 14
 	btn.Parent = parent
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 	return btn
@@ -145,10 +154,11 @@ end
 
 local function createInputPanel(placeholderText, actionText, order, parent)
 	local container = Instance.new("Frame")
-	container.Size = UDim2.new(0.99, 0, 0, 36)
+	container.Size = UDim2.new(0.98, 0, 0, 36)
 	container.BackgroundColor3 = THEME.PANEL
 	container.BorderSizePixel = 0
 	container.LayoutOrder = order
+	container.ZIndex = 14
 	container.Parent = parent
 	Instance.new("UICorner", container).CornerRadius = UDim.new(0, 6)
 
@@ -163,6 +173,7 @@ local function createInputPanel(placeholderText, actionText, order, parent)
 	box.TextColor3 = Color3.fromRGB(255, 255, 255)
 	box.TextSize = 11
 	box.Font = Enum.Font.Gotham
+	box.ZIndex = 15
 	box.Parent = container
 	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
 
@@ -175,6 +186,7 @@ local function createInputPanel(placeholderText, actionText, order, parent)
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.TextSize = 10
 	btn.Font = Enum.Font.GothamBold
+	btn.ZIndex = 15
 	btn.Parent = container
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
 
@@ -188,7 +200,7 @@ end
 tabsContent[1].Visible = true
 
 for idx, btn in ipairs(tabBtns) do
-	btn.MouseButton1Click:Connect(function()
+	btn.Activated:Connect(function()
 		for i, b in ipairs(tabBtns) do
 			b.BackgroundColor3 = THEME.BTN_OFF
 			b.TextColor3 = THEME.TEXT_MUTED
@@ -206,13 +218,11 @@ local function updateToggleVisual(btn, name, state)
 end
 
 --------------------------------------------------------------------------------
--- 1. ВКЛАДКА "ИГРОК"
+-- 1. ИГРОК
 --------------------------------------------------------------------------------
-
--- Noclip
 local noclip = false
 local noclipBtn = createToggle("Noclip (Сквозь стены)", 1, tabsContent[1])
-noclipBtn.MouseButton1Click:Connect(function()
+noclipBtn.Activated:Connect(function()
 	noclip = not noclip
 	updateToggleVisual(noclipBtn, "Noclip (Сквозь стены)", noclip)
 end)
@@ -227,11 +237,10 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
--- Fly
 local flying = false
 local flySpeed = 50
 local flyBtn = createToggle("Fly (Полёт)", 2, tabsContent[1])
-flyBtn.MouseButton1Click:Connect(function()
+flyBtn.Activated:Connect(function()
 	flying = not flying
 	updateToggleVisual(flyBtn, "Fly (Полёт)", flying)
 	
@@ -257,12 +266,11 @@ flyBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
--- Infinite Jump
 local infJump = false
-local infJumpBtn = createToggle("Infinite Jump (Бесконечный прыжок)", 3, tabsContent[1])
-infJumpBtn.MouseButton1Click:Connect(function()
+local infJumpBtn = createToggle("Infinite Jump", 3, tabsContent[1])
+infJumpBtn.Activated:Connect(function()
 	infJump = not infJump
-	updateToggleVisual(infJumpBtn, "Infinite Jump (Бесконечный прыжок)", infJump)
+	updateToggleVisual(infJumpBtn, "Infinite Jump", infJump)
 end)
 
 UserInputService.JumpRequest:Connect(function()
@@ -271,52 +279,8 @@ UserInputService.JumpRequest:Connect(function()
 	end
 end)
 
--- ESP Players
-local espActive = false
-local espBtn = createToggle("ESP (Подсветка игроков)", 4, tabsContent[1])
-espBtn.MouseButton1Click:Connect(function()
-	espActive = not espActive
-	updateToggleVisual(espBtn, "ESP (Подсветка игроков)", espActive)
-	
-	for _, p in ipairs(Players:GetPlayers()) do
-		if p ~= player and p.Character then
-			if espActive then
-				if not p.Character:FindFirstChild("KairoHighlight") then
-					local hl = Instance.new("Highlight")
-					hl.Name = "KairoHighlight"
-					hl.FillColor = Color3.fromRGB(168, 85, 247)
-					hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-					hl.Parent = p.Character
-				end
-			else
-				if p.Character:FindFirstChild("KairoHighlight") then
-					p.Character.KairoHighlight:Destroy()
-				end
-			end
-		end
-	end
-end)
-
--- Fullbright
-local fullbright = false
-local fbBtn = createToggle("Fullbright (Яркость карты)", 5, tabsContent[1])
-fbBtn.MouseButton1Click:Connect(function()
-	fullbright = not fullbright
-	updateToggleVisual(fbBtn, "Fullbright (Яркость карты)", fullbright)
-	if fullbright then
-		Lighting.Brightness = 2
-		Lighting.ClockTime = 14
-		Lighting.FogEnd = 100000
-		Lighting.GlobalShadows = false
-	else
-		Lighting.Brightness = 1
-		Lighting.GlobalShadows = true
-	end
-end)
-
--- WalkSpeed & JumpPower Input
-local speedBox, speedBtn = createInputPanel("Скорость (по умолч. 16)", "Сделать скорость", 6, tabsContent[1])
-speedBtn.MouseButton1Click:Connect(function()
+local speedBox, speedBtn = createInputPanel("Скорость (число)", "Применить", 4, tabsContent[1])
+speedBtn.Activated:Connect(function()
 	local val = tonumber(speedBox.Text)
 	if val and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
 		player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = val
@@ -324,14 +288,13 @@ speedBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------------------------------------
--- 2. ВКЛАДКА "BLADE BALL"
+-- 2. BLADE BALL
 --------------------------------------------------------------------------------
-
 local autoParry = false
-local bbParryBtn = createToggle("Auto Parry (Авто-Отбив)", 1, tabsContent[2])
-bbParryBtn.MouseButton1Click:Connect(function()
+local bbParryBtn = createToggle("Auto Parry", 1, tabsContent[2])
+bbParryBtn.Activated:Connect(function()
 	autoParry = not autoParry
-	updateToggleVisual(bbParryBtn, "Auto Parry (Авто-Отбив)", autoParry)
+	updateToggleVisual(bbParryBtn, "Auto Parry", autoParry)
 	
 	task.spawn(function()
 		while autoParry do
@@ -353,35 +316,12 @@ bbParryBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
-local ballEsp = false
-local ballEspBtn = createToggle("Ball ESP (Подсветка мяча)", 2, tabsContent[2])
-ballEspBtn.MouseButton1Click:Connect(function()
-	ballEsp = not ballEsp
-	updateToggleVisual(ballEspBtn, "Ball ESP (Подсветка мяча)", ballEsp)
-	
-	local balls = workspace:FindFirstChild("Balls")
-	if balls then
-		for _, ball in ipairs(balls:GetChildren()) do
-			if ballEsp then
-				if not ball:FindFirstChild("BallHL") then
-					local hl = Instance.new("Highlight", ball)
-					hl.Name = "BallHL"
-					hl.FillColor = Color3.fromRGB(255, 0, 0)
-				end
-			else
-				if ball:FindFirstChild("BallHL") then ball.BallHL:Destroy() end
-			end
-		end
-	end
-end)
-
 --------------------------------------------------------------------------------
--- 3. ВКЛАДКА "BLOX FRUITS"
+-- 3. BLOX FRUITS
 --------------------------------------------------------------------------------
-
 local bfFarm = false
 local bfFarmBtn = createToggle("Auto Farm Mobs", 1, tabsContent[3])
-bfFarmBtn.MouseButton1Click:Connect(function()
+bfFarmBtn.Activated:Connect(function()
 	bfFarm = not bfFarm
 	updateToggleVisual(bfFarmBtn, "Auto Farm Mobs", bfFarm)
 
@@ -407,28 +347,11 @@ bfFarmBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
-local infEnergy = false
-local energyBtn = createToggle("Infinite Energy (Бесконечная энергия)", 2, tabsContent[3])
-energyBtn.MouseButton1Click:Connect(function()
-	infEnergy = not infEnergy
-	updateToggleVisual(energyBtn, "Infinite Energy (Бесконечная энергия)", infEnergy)
-	
-	task.spawn(function()
-		while infEnergy do
-			if player.Character and player.Character:FindFirstChild("Energy") then
-				player.Character.Energy.Value = player.Character.Energy.MaxValue
-			end
-			task.wait(0.5)
-		end
-	end)
-end)
-
 --------------------------------------------------------------------------------
--- 4. ВКЛАДКА "DESERT"
+-- 4. DESERT
 --------------------------------------------------------------------------------
-
-local tpNickBox, tpNickBtn = createInputPanel("Ник игрока...", "⚡ ТП к игроку", 1, tabsContent[4])
-tpNickBtn.MouseButton1Click:Connect(function()
+local tpNickBox, tpNickBtn = createInputPanel("Ник...", "⚡ ТП", 1, tabsContent[4])
+tpNickBtn.Activated:Connect(function()
 	local target = getPlayerByPartialName(tpNickBox.Text)
 	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
 		if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
@@ -437,52 +360,14 @@ tpNickBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-local explodeBox, explodeBtn = createInputPanel("Ник для взрыва...", "💣 Взорвать", 2, tabsContent[4])
-explodeBtn.MouseButton1Click:Connect(function()
-	local target = getPlayerByPartialName(explodeBox.Text)
-	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-		local exp = Instance.new("Explosion")
-		exp.Position = target.Character.HumanoidRootPart.Position
-		exp.BlastRadius = 20
-		exp.Parent = workspace
-	end
-end)
-
-local killAura = false
-local kaBtn = createToggle("Kill Aura / Auto-Attack", 3, tabsContent[4])
-kaBtn.MouseButton1Click:Connect(function()
-	killAura = not killAura
-	updateToggleVisual(kaBtn, "Kill Aura / Auto-Attack", killAura)
-	
-	task.spawn(function()
-		while killAura do
-			local char = player.Character
-			if char and char:FindFirstChild("HumanoidRootPart") then
-				for _, otherPlayer in ipairs(Players:GetPlayers()) do
-					if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-						local dist = (otherPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-						if dist < 15 then
-							VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-							task.wait(0.05)
-							VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-						end
-					end
-				end
-			end
-			task.wait(0.1)
-		end
-	end)
-end)
-
 --------------------------------------------------------------------------------
--- 5. ВКЛАДКА "BABFT (Построй корабль)"
+-- 5. BABFT
 --------------------------------------------------------------------------------
-
 local autoGold = false
-local goldBtn = createToggle("Авто-Фарм золота (Авто-Победа)", 1, tabsContent[5])
-goldBtn.MouseButton1Click:Connect(function()
+local goldBtn = createToggle("Авто-Фарм золота", 1, tabsContent[5])
+goldBtn.Activated:Connect(function()
 	autoGold = not autoGold
-	updateToggleVisual(goldBtn, "Авто-Фарм золота (Авто-Победа)", autoGold)
+	updateToggleVisual(goldBtn, "Авто-Фарм золота", autoGold)
 	
 	task.spawn(function()
 		while autoGold do
@@ -492,14 +377,12 @@ goldBtn.MouseButton1Click:Connect(function()
 				if stages then
 					for i = 1, 10 do
 						if not autoGold then break end
-						local stageName = "CaveStage" .. tostring(i)
-						local stage = stages:FindFirstChild(stageName)
+						local stage = stages:FindFirstChild("CaveStage" .. tostring(i))
 						if stage and stage:FindFirstChild("DarknessPart") then
 							char:PivotTo(stage.DarknessPart.CFrame)
-							task.wait(0.5)
+							task.wait(0.4)
 						end
 					end
-					
 					local endChest = stages:FindFirstChild("TheEnd") and stages.TheEnd:FindFirstChild("GoldenChest")
 					if endChest and endChest:FindFirstChild("Trigger") then
 						char:PivotTo(endChest.Trigger.CFrame)
@@ -511,54 +394,36 @@ goldBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
-local noWater = false
-local waterBtn = createToggle("Убрать урон от воды", 2, tabsContent[5])
-waterBtn.MouseButton1Click:Connect(function()
-	noWater = not noWater
-	updateToggleVisual(waterBtn, "Убрать урон от воды", noWater)
-	
-	for _, obj in ipairs(workspace:GetDescendants()) do
-		if obj.Name == "Water" or obj.Name == "WaterPart" then
-			if noWater then
-				obj.CanTouch = false
-			else
-				obj.CanTouch = true
-			end
-		end
-	end
-end)
-
 --------------------------------------------------------------------------------
--- УПРАВЛЕНИЕ UI
+-- 100% РАБОЧЕЕ ПЕРЕТАСКИВАНИЕ (DRAGGING)
 --------------------------------------------------------------------------------
+local isDragging = false
+local dragOffset = Vector2.new()
 
--- Dragging
-local dragging, dragInput, dragStart, startPos
 header.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
+		isDragging = true
+		local mousePos = UserInputService:GetMouseLocation()
+		dragOffset = Vector2.new(mainFrame.AbsolutePosition.X - mousePos.X, mainFrame.AbsolutePosition.Y - mousePos.Y)
 	end
 end)
 
-header.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
+UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		isDragging = false
 	end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - dragStart
-		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+RunService.RenderStepped:Connect(function()
+	if isDragging then
+		local mousePos = UserInputService:GetMouseLocation()
+		mainFrame.Position = UDim2.new(0, mousePos.X + dragOffset.X, 0, mousePos.Y + dragOffset.Y)
 	end
 end)
 
--- Скрытие меню на клавишу RightShift
+-- Клавиша RightShift для скрыть/показать
 UserInputService.InputBegan:Connect(function(input, gpe)
-	if gpe then return end
-	if input.KeyCode == Enum.KeyCode.RightShift then
+	if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
 		mainFrame.Visible = not mainFrame.Visible
 	end
 end)
