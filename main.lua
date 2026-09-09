@@ -3,6 +3,7 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local VirtualUser = game:GetService("VirtualUser")
+local Lighting = game:GetService("Lighting")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -40,10 +41,10 @@ local function getPlayerByPartialName(name)
 	return nil
 end
 
--- Основное окно GUI
+-- Главное окно
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 560, 0, 360)
-mainFrame.Position = UDim2.new(0.5, -280, 0.5, -180)
+mainFrame.Size = UDim2.new(0, 580, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -290, 0.5, -200)
 mainFrame.BackgroundColor3 = THEME.BG
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -54,7 +55,7 @@ local mainStroke = Instance.new("UIStroke", mainFrame)
 mainStroke.Color = THEME.BORDER
 mainStroke.Thickness = 1.5
 
--- Шапка
+-- Заголовок
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 36)
 header.BackgroundColor3 = THEME.HEADER
@@ -62,10 +63,10 @@ header.BorderSizePixel = 0
 header.Parent = mainFrame
 
 local menuTitle = Instance.new("TextLabel")
-menuTitle.Size = UDim2.new(0.6, 0, 1, 0)
+menuTitle.Size = UDim2.new(0.8, 0, 1, 0)
 menuTitle.Position = UDim2.new(0, 12, 0, 0)
 menuTitle.BackgroundTransparency = 1
-menuTitle.Text = "🔮 KAIROTECH MULTIHUB (Fixed)"
+menuTitle.Text = "🔮 KAIROTECH MULTIHUB (Expanded)"
 menuTitle.TextColor3 = THEME.TEXT_TITLE
 menuTitle.TextSize = 13
 menuTitle.Font = Enum.Font.GothamBold
@@ -79,7 +80,7 @@ tabContainer.Position = UDim2.new(0, 10, 0, 42)
 tabContainer.BackgroundTransparency = 1
 tabContainer.BorderSizePixel = 0
 tabContainer.ScrollBarThickness = 2
-tabContainer.CanvasSize = UDim2.new(1.8, 0, 0, 0)
+tabContainer.CanvasSize = UDim2.new(1.5, 0, 0, 0)
 tabContainer.Parent = mainFrame
 
 local tabLayout = Instance.new("UIListLayout", tabContainer)
@@ -89,7 +90,7 @@ tabLayout.Padding = UDim.new(0, 6)
 
 local function createTabBtn(text, order)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 100, 1, 0)
+	btn.Size = UDim2.new(0, 105, 1, 0)
 	btn.BackgroundColor3 = (order == 1) and THEME.BTN_ON or THEME.BTN_OFF
 	btn.BorderSizePixel = 0
 	btn.Text = text
@@ -128,7 +129,7 @@ end
 
 local function createToggle(text, order, parent)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0.99, 0, 0, 34)
+	btn.Size = UDim2.new(0.99, 0, 0, 32)
 	btn.BackgroundColor3 = THEME.PANEL
 	btn.BorderSizePixel = 0
 	btn.Text = "   " .. text .. ":  ВЫКЛ"
@@ -142,7 +143,7 @@ local function createToggle(text, order, parent)
 	return btn
 end
 
-local function createTargetPanel(placeholderText, actionText, order, parent)
+local function createInputPanel(placeholderText, actionText, order, parent)
 	local container = Instance.new("Frame")
 	container.Size = UDim2.new(0.99, 0, 0, 36)
 	container.BackgroundColor3 = THEME.PANEL
@@ -205,10 +206,10 @@ local function updateToggleVisual(btn, name, state)
 end
 
 --------------------------------------------------------------------------------
--- ЛОГИКА ФУНКЦИЙ С ПРОВЕРКОЙ
+-- 1. ВКЛАДКА "ИГРОК"
 --------------------------------------------------------------------------------
 
--- 1. ИГРОК: NOCLIP
+-- Noclip
 local noclip = false
 local noclipBtn = createToggle("Noclip (Сквозь стены)", 1, tabsContent[1])
 noclipBtn.MouseButton1Click:Connect(function()
@@ -226,7 +227,106 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
--- 2. BLADE BALL: AUTO PARRY (С ИСПОЛЬЗОВАНИЕМ VIRTUALUSER)
+-- Fly
+local flying = false
+local flySpeed = 50
+local flyBtn = createToggle("Fly (Полёт)", 2, tabsContent[1])
+flyBtn.MouseButton1Click:Connect(function()
+	flying = not flying
+	updateToggleVisual(flyBtn, "Fly (Полёт)", flying)
+	
+	task.spawn(function()
+		while flying do
+			local char = player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				local hrp = char.HumanoidRootPart
+				local cam = workspace.CurrentCamera
+				local moveDir = Vector3.new()
+				
+				if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+				if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+				
+				hrp.Velocity = moveDir * flySpeed
+			end
+			task.wait(0.01)
+		end
+	end)
+end)
+
+-- Infinite Jump
+local infJump = false
+local infJumpBtn = createToggle("Infinite Jump (Бесконечный прыжок)", 3, tabsContent[1])
+infJumpBtn.MouseButton1Click:Connect(function()
+	infJump = not infJump
+	updateToggleVisual(infJumpBtn, "Infinite Jump (Бесконечный прыжок)", infJump)
+end)
+
+UserInputService.JumpRequest:Connect(function()
+	if infJump and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+		player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+	end
+end)
+
+-- ESP Players
+local espActive = false
+local espBtn = createToggle("ESP (Подсветка игроков)", 4, tabsContent[1])
+espBtn.MouseButton1Click:Connect(function()
+	espActive = not espActive
+	updateToggleVisual(espBtn, "ESP (Подсветка игроков)", espActive)
+	
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= player and p.Character then
+			if espActive then
+				if not p.Character:FindFirstChild("KairoHighlight") then
+					local hl = Instance.new("Highlight")
+					hl.Name = "KairoHighlight"
+					hl.FillColor = Color3.fromRGB(168, 85, 247)
+					hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+					hl.Parent = p.Character
+				end
+			else
+				if p.Character:FindFirstChild("KairoHighlight") then
+					p.Character.KairoHighlight:Destroy()
+				end
+			end
+		end
+	end
+end)
+
+-- Fullbright
+local fullbright = false
+local fbBtn = createToggle("Fullbright (Яркость карты)", 5, tabsContent[1])
+fbBtn.MouseButton1Click:Connect(function()
+	fullbright = not fullbright
+	updateToggleVisual(fbBtn, "Fullbright (Яркость карты)", fullbright)
+	if fullbright then
+		Lighting.Brightness = 2
+		Lighting.ClockTime = 14
+		Lighting.FogEnd = 100000
+		Lighting.GlobalShadows = false
+	else
+		Lighting.Brightness = 1
+		Lighting.GlobalShadows = true
+	end
+end)
+
+-- WalkSpeed & JumpPower Input
+local speedBox, speedBtn = createInputPanel("Скорость (по умолч. 16)", "Сделать скорость", 6, tabsContent[1])
+speedBtn.MouseButton1Click:Connect(function()
+	local val = tonumber(speedBox.Text)
+	if val and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+		player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = val
+	end
+end)
+
+--------------------------------------------------------------------------------
+-- 2. ВКЛАДКА "BLADE BALL"
+--------------------------------------------------------------------------------
+
 local autoParry = false
 local bbParryBtn = createToggle("Auto Parry (Авто-Отбив)", 1, tabsContent[2])
 bbParryBtn.MouseButton1Click:Connect(function()
@@ -240,9 +340,9 @@ bbParryBtn.MouseButton1Click:Connect(function()
 				for _, ball in ipairs(balls:GetChildren()) do
 					if ball:IsA("BasePart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
 						local dist = (ball.Position - player.Character.HumanoidRootPart.Position).Magnitude
-						if dist < 25 then
+						if dist < 30 then
 							VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-							task.wait(0.05)
+							task.wait(0.02)
 							VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 						end
 					end
@@ -253,7 +353,32 @@ bbParryBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
--- 3. BLOX FRUITS: AUTO FARM MOBS
+local ballEsp = false
+local ballEspBtn = createToggle("Ball ESP (Подсветка мяча)", 2, tabsContent[2])
+ballEspBtn.MouseButton1Click:Connect(function()
+	ballEsp = not ballEsp
+	updateToggleVisual(ballEspBtn, "Ball ESP (Подсветка мяча)", ballEsp)
+	
+	local balls = workspace:FindFirstChild("Balls")
+	if balls then
+		for _, ball in ipairs(balls:GetChildren()) do
+			if ballEsp then
+				if not ball:FindFirstChild("BallHL") then
+					local hl = Instance.new("Highlight", ball)
+					hl.Name = "BallHL"
+					hl.FillColor = Color3.fromRGB(255, 0, 0)
+				end
+			else
+				if ball:FindFirstChild("BallHL") then ball.BallHL:Destroy() end
+			end
+		end
+	end
+end)
+
+--------------------------------------------------------------------------------
+-- 3. ВКЛАДКА "BLOX FRUITS"
+--------------------------------------------------------------------------------
+
 local bfFarm = false
 local bfFarmBtn = createToggle("Auto Farm Mobs", 1, tabsContent[3])
 bfFarmBtn.MouseButton1Click:Connect(function()
@@ -268,22 +393,41 @@ bfFarmBtn.MouseButton1Click:Connect(function()
 					if not bfFarm then break end
 					if npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 and npc:FindFirstChild("HumanoidRootPart") and npc ~= char then
 						local dist = (npc.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
-						if dist < 200 then
-							char:PivotTo(npc.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3))
+						if dist < 250 then
+							char:PivotTo(npc.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4))
 							VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-							task.wait(0.1)
+							task.wait(0.08)
 							VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 						end
 					end
 				end
 			end
-			task.wait(0.2)
+			task.wait(0.1)
 		end
 	end)
 end)
 
--- 4. DESERT: ТЕЛЕПОРТ И ВЗРЫВ
-local tpNickBox, tpNickBtn = createTargetPanel("Ник игрока...", "⚡ ТП к игроку", 1, tabsContent[4])
+local infEnergy = false
+local energyBtn = createToggle("Infinite Energy (Бесконечная энергия)", 2, tabsContent[3])
+energyBtn.MouseButton1Click:Connect(function()
+	infEnergy = not infEnergy
+	updateToggleVisual(energyBtn, "Infinite Energy (Бесконечная энергия)", infEnergy)
+	
+	task.spawn(function()
+		while infEnergy do
+			if player.Character and player.Character:FindFirstChild("Energy") then
+				player.Character.Energy.Value = player.Character.Energy.MaxValue
+			end
+			task.wait(0.5)
+		end
+	end)
+end)
+
+--------------------------------------------------------------------------------
+-- 4. ВКЛАДКА "DESERT"
+--------------------------------------------------------------------------------
+
+local tpNickBox, tpNickBtn = createInputPanel("Ник игрока...", "⚡ ТП к игроку", 1, tabsContent[4])
 tpNickBtn.MouseButton1Click:Connect(function()
 	local target = getPlayerByPartialName(tpNickBox.Text)
 	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
@@ -293,30 +437,102 @@ tpNickBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-local explodeBox, explodeBtn = createTargetPanel("Ник для взрыва...", "💣 Взорвать", 2, tabsContent[4])
+local explodeBox, explodeBtn = createInputPanel("Ник для взрыва...", "💣 Взорвать", 2, tabsContent[4])
 explodeBtn.MouseButton1Click:Connect(function()
 	local target = getPlayerByPartialName(explodeBox.Text)
 	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
 		local exp = Instance.new("Explosion")
 		exp.Position = target.Character.HumanoidRootPart.Position
-		exp.BlastRadius = 15
+		exp.BlastRadius = 20
 		exp.Parent = workspace
 	end
 end)
 
--- 5. BABFT: ТЕЛЕПОРТ К КЛАДУ
-local chestTpBtn = createToggle("Телепорт к сокровищу", 1, tabsContent[5])
-chestTpBtn.MouseButton1Click:Connect(function()
-	local char = player.Character
-	if char and char:FindFirstChild("HumanoidRootPart") then
-		local endChest = workspace:FindFirstChild("BoatStages") and workspace.BoatStages:FindFirstChild("NormalStages") and workspace.BoatStages.NormalStages:FindFirstChild("TheEnd") and workspace.BoatStages.NormalStages.TheEnd:FindFirstChild("GoldenChest")
-		if endChest and endChest:FindFirstChild("Trigger") then
-			char:PivotTo(endChest.Trigger.CFrame)
+local killAura = false
+local kaBtn = createToggle("Kill Aura / Auto-Attack", 3, tabsContent[4])
+kaBtn.MouseButton1Click:Connect(function()
+	killAura = not killAura
+	updateToggleVisual(kaBtn, "Kill Aura / Auto-Attack", killAura)
+	
+	task.spawn(function()
+		while killAura do
+			local char = player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				for _, otherPlayer in ipairs(Players:GetPlayers()) do
+					if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+						local dist = (otherPlayer.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
+						if dist < 15 then
+							VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+							task.wait(0.05)
+							VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+						end
+					end
+				end
+			end
+			task.wait(0.1)
+		end
+	end)
+end)
+
+--------------------------------------------------------------------------------
+-- 5. ВКЛАДКА "BABFT (Построй корабль)"
+--------------------------------------------------------------------------------
+
+local autoGold = false
+local goldBtn = createToggle("Авто-Фарм золота (Авто-Победа)", 1, tabsContent[5])
+goldBtn.MouseButton1Click:Connect(function()
+	autoGold = not autoGold
+	updateToggleVisual(goldBtn, "Авто-Фарм золота (Авто-Победа)", autoGold)
+	
+	task.spawn(function()
+		while autoGold do
+			local char = player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				local stages = workspace:FindFirstChild("BoatStages") and workspace.BoatStages:FindFirstChild("NormalStages")
+				if stages then
+					for i = 1, 10 do
+						if not autoGold then break end
+						local stageName = "CaveStage" .. tostring(i)
+						local stage = stages:FindFirstChild(stageName)
+						if stage and stage:FindFirstChild("DarknessPart") then
+							char:PivotTo(stage.DarknessPart.CFrame)
+							task.wait(0.5)
+						end
+					end
+					
+					local endChest = stages:FindFirstChild("TheEnd") and stages.TheEnd:FindFirstChild("GoldenChest")
+					if endChest and endChest:FindFirstChild("Trigger") then
+						char:PivotTo(endChest.Trigger.CFrame)
+					end
+				end
+			end
+			task.wait(2)
+		end
+	end)
+end)
+
+local noWater = false
+local waterBtn = createToggle("Убрать урон от воды", 2, tabsContent[5])
+waterBtn.MouseButton1Click:Connect(function()
+	noWater = not noWater
+	updateToggleVisual(waterBtn, "Убрать урон от воды", noWater)
+	
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj.Name == "Water" or obj.Name == "WaterPart" then
+			if noWater then
+				obj.CanTouch = false
+			else
+				obj.CanTouch = true
+			end
 		end
 	end
 end)
 
--- Перетаскивание UI
+--------------------------------------------------------------------------------
+-- УПРАВЛЕНИЕ UI
+--------------------------------------------------------------------------------
+
+-- Dragging
 local dragging, dragInput, dragStart, startPos
 header.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -339,7 +555,7 @@ UserInputService.InputChanged:Connect(function(input)
 	end
 end)
 
--- Переключение скрытия скрипта на RightShift
+-- Скрытие меню на клавишу RightShift
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then return end
 	if input.KeyCode == Enum.KeyCode.RightShift then
