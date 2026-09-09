@@ -2,6 +2,7 @@ local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -26,16 +27,108 @@ local THEME = {
 	BORDER = Color3.fromRGB(139, 92, 246),
 	BTN_OFF = Color3.fromRGB(28, 24, 44),
 	BTN_ON = Color3.fromRGB(124, 58, 237),
-	SUCCESS = Color3.fromRGB(34, 197, 94)
+	SUCCESS = Color3.fromRGB(34, 197, 94),
+	ERROR = Color3.fromRGB(239, 68, 68)
 }
 
--- Главный контейнер
+--------------------------------------------------------------------------------
+-- 🔒 ЭКРАН ЗАГРУЗКИ И ПАРОЛЯ
+--------------------------------------------------------------------------------
+local CORRECT_PASSWORD = "2200"
+
+local authFrame = Instance.new("Frame")
+authFrame.Size = UDim2.new(0, 360, 0, 220)
+authFrame.Position = UDim2.new(0.5, -180, 0.5, -110)
+authFrame.BackgroundColor3 = THEME.BG
+authFrame.BorderSizePixel = 0
+authFrame.ZIndex = 100
+authFrame.Parent = screenGui
+
+Instance.new("UICorner", authFrame).CornerRadius = UDim.new(0, 12)
+local authStroke = Instance.new("UIStroke", authFrame)
+authStroke.Color = THEME.BORDER
+authStroke.Thickness = 1.5
+
+local authTitle = Instance.new("TextLabel")
+authTitle.Size = UDim2.new(1, 0, 0, 40)
+authTitle.BackgroundTransparency = 1
+authTitle.Text = "🔮 KAIROTECH SYSTEM LOGIN"
+authTitle.TextColor3 = THEME.TEXT_TITLE
+authTitle.TextSize = 13
+authTitle.Font = Enum.Font.GothamBold
+authTitle.ZIndex = 101
+authTitle.Parent = authFrame
+
+-- Полоса загрузки
+local loadingBarBG = Instance.new("Frame")
+loadingBarBG.Size = UDim2.new(0.85, 0, 0, 8)
+loadingBarBG.Position = UDim2.new(0.075, 0, 0.3, 0)
+loadingBarBG.BackgroundColor3 = THEME.PANEL
+loadingBarBG.BorderSizePixel = 0
+loadingBarBG.ZIndex = 101
+loadingBarBG.Parent = authFrame
+Instance.new("UICorner", loadingBarBG).CornerRadius = UDim.new(0, 4)
+
+local loadingBarFill = Instance.new("Frame")
+loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+loadingBarFill.BackgroundColor3 = THEME.TEXT_TITLE
+loadingBarFill.BorderSizePixel = 0
+loadingBarFill.ZIndex = 102
+loadingBarFill.Parent = loadingBarBG
+Instance.new("UICorner", loadingBarFill).CornerRadius = UDim.new(0, 4)
+
+local loadingStatus = Instance.new("TextLabel")
+loadingStatus.Size = UDim2.new(1, 0, 0, 20)
+loadingStatus.Position = UDim2.new(0, 0, 0.38, 0)
+loadingStatus.BackgroundTransparency = 1
+loadingStatus.Text = "Загрузка скрипта..."
+loadingStatus.TextColor3 = THEME.TEXT_MUTED
+loadingStatus.TextSize = 10
+loadingStatus.Font = Enum.Font.Gotham
+loadingStatus.ZIndex = 101
+loadingStatus.Parent = authFrame
+
+-- Форма ввода пароля
+local passBox = Instance.new("TextBox")
+passBox.Size = UDim2.new(0.85, 0, 0, 36)
+passBox.Position = UDim2.new(0.075, 0, 0.52, 0)
+passBox.BackgroundColor3 = THEME.PANEL
+passBox.BorderSizePixel = 0
+passBox.PlaceholderText = "Введите пароль..."
+passBox.PlaceholderColor3 = THEME.TEXT_MUTED
+passBox.Text = ""
+passBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+passBox.TextSize = 12
+passBox.Font = Enum.Font.Gotham
+passBox.ZIndex = 101
+passBox.Visible = false
+passBox.Parent = authFrame
+Instance.new("UICorner", passBox).CornerRadius = UDim.new(0, 6)
+
+local loginBtn = Instance.new("TextButton")
+loginBtn.Size = UDim2.new(0.85, 0, 0, 34)
+loginBtn.Position = UDim2.new(0.075, 0, 0.74, 0)
+loginBtn.BackgroundColor3 = THEME.BTN_ON
+loginBtn.BorderSizePixel = 0
+loginBtn.Text = "ВОЙТИ"
+loginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+loginBtn.TextSize = 11
+loginBtn.Font = Enum.Font.GothamBold
+loginBtn.ZIndex = 101
+loginBtn.Visible = false
+loginBtn.Parent = authFrame
+Instance.new("UICorner", loginBtn).CornerRadius = UDim.new(0, 6)
+
+--------------------------------------------------------------------------------
+-- 📱 ГЛАВНЫЙ ИНТЕРФЕЙС (СКРЫТ ДО АВТОРИЗАЦИИ)
+--------------------------------------------------------------------------------
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 520, 0, 420)
 mainFrame.Position = UDim2.new(0.5, -260, 0.5, -210)
 mainFrame.BackgroundColor3 = THEME.BG
 mainFrame.BorderSizePixel = 0
 mainFrame.ZIndex = 10
+mainFrame.Visible = false
 mainFrame.Parent = screenGui
 
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
@@ -195,7 +288,50 @@ local function updateToggleVisual(btn, name, state)
 end
 
 --------------------------------------------------------------------------------
--- 🟢 РАЗДЕЛ 1: ИГРОК
+-- ⚙️ АНИМАЦИЯ ЗАГРУЗКИ И ПРОВЕРКА ПАРОЛЯ (2200)
+--------------------------------------------------------------------------------
+task.spawn(function()
+	local tweenInfo = TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(loadingBarFill, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)}):Play()
+	
+	task.wait(0.4)
+	loadingStatus.Text = "Проверка компонентов..."
+	task.wait(0.4)
+	loadingStatus.Text = "Инициализация интерфейса..."
+	task.wait(0.5)
+	
+	loadingBarBG.Visible = false
+	loadingStatus.Text = "Введите ключ доступа:"
+	loadingStatus.TextColor3 = THEME.TEXT_ACCENT
+	passBox.Visible = true
+	loginBtn.Visible = true
+end)
+
+local function checkPassword()
+	if passBox.Text == CORRECT_PASSWORD then
+		loadingStatus.Text = "Доступ разрешен!"
+		loadingStatus.TextColor3 = THEME.SUCCESS
+		loginBtn.BackgroundColor3 = THEME.SUCCESS
+		task.wait(0.5)
+		authFrame:Destroy()
+		mainFrame.Visible = true
+	else
+		loadingStatus.Text = "Неверный пароль!"
+		loadingStatus.TextColor3 = THEME.ERROR
+		passBox.Text = ""
+		task.wait(1)
+		loadingStatus.Text = "Введите ключ доступа:"
+		loadingStatus.TextColor3 = THEME.TEXT_ACCENT
+	end
+end
+
+loginBtn.Activated:Connect(checkPassword)
+passBox.FocusLost:Connect(function(enterPressed)
+	if enterPressed then checkPassword() end
+end)
+
+--------------------------------------------------------------------------------
+-- 🏃 РАЗДЕЛ 1: ИГРОК
 --------------------------------------------------------------------------------
 
 -- 1. Noclip
@@ -213,7 +349,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
--- 2. Fly (Полёт)
+-- 2. Fly
 local flying = false
 local flySpeed = 50
 local flyBtn = createToggle("2. Fly (Полёт)", 2, tabsContent[1])
@@ -308,7 +444,7 @@ end)
 -- 🛶 РАЗДЕЛ 2: ПОСТРОЙ КОРАБЛЬ (BABFT)
 --------------------------------------------------------------------------------
 
--- 1. Авто-Фарм с полётом в воздухе
+-- 1. Авто-Фарм в воздухе
 local autoGoldAir = false
 local autoGoldBtn = createToggle("1. Авто-Фарм (В воздухе над водой)", 1, tabsContent[2])
 autoGoldBtn.Activated:Connect(function()
@@ -437,7 +573,7 @@ loadPosBtn.Activated:Connect(function()
 end)
 
 --------------------------------------------------------------------------------
--- 🖱️ ПЕРЕТАСКИВАНИЕ UI (DRAGGING)
+-- 🖱️ ПЕРЕТАСКИВАНИЕ UI
 --------------------------------------------------------------------------------
 local isDragging = false
 local dragOffset = Vector2.new()
@@ -466,6 +602,8 @@ end)
 -- Нажми RightShift чтобы скрыть/показать UI
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
-		mainFrame.Visible = not mainFrame.Visible
+		if mainFrame.Parent and not authFrame.Parent then
+			mainFrame.Visible = not mainFrame.Visible
+		end
 	end
 end)
