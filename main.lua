@@ -15,30 +15,55 @@ screenGui.Name = "KairoTechUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
+-- Цветовая палитра (Фиолетово-синяя)
+local THEME = {
+	BG = Color3.fromRGB(12, 10, 20),
+	HEADER = Color3.fromRGB(18, 14, 30),
+	PANEL = Color3.fromRGB(22, 18, 36),
+	TEXT_TITLE = Color3.fromRGB(168, 85, 247), -- Неоново-фиолетовый
+	TEXT_ACCENT = Color3.fromRGB(99, 102, 241), -- Неоново-синий
+	TEXT_MUTED = Color3.fromRGB(140, 140, 170),
+	BORDER = Color3.fromRGB(139, 92, 246),
+	BTN_OFF = Color3.fromRGB(28, 24, 44),
+	BTN_ON = Color3.fromRGB(124, 58, 237),
+	SUCCESS = Color3.fromRGB(34, 197, 94)
+}
+
+-- Вспомогательная функция поиска игрока по части ника
+local function getPlayerByPartialName(name)
+	name = name:lower()
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= player and (p.Name:lower():find(name) or p.DisplayName:lower():find(name)) then
+			return p
+		end
+	end
+	return nil
+end
+
 --------------------------------------------------------------------------------
--- 1. ИНТРО (Минималистичное и стильное)
+-- 1. ИНТРО
 --------------------------------------------------------------------------------
 local introCard = Instance.new("Frame")
-introCard.Size = UDim2.new(0, 280, 0, 90)
-introCard.Position = UDim2.new(0.5, -140, 0.4, -45)
-introCard.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+introCard.Size = UDim2.new(0, 290, 0, 95)
+introCard.Position = UDim2.new(0.5, -145, 0.4, -47)
+introCard.BackgroundColor3 = THEME.BG
 introCard.BorderSizePixel = 0
 introCard.BackgroundTransparency = 1
 introCard.Parent = screenGui
 
-Instance.new("UICorner", introCard).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", introCard).CornerRadius = UDim.new(0, 14)
 local introStroke = Instance.new("UIStroke", introCard)
-introStroke.Color = Color3.fromRGB(0, 195, 255)
-introStroke.Thickness = 1.5
+introStroke.Color = THEME.BORDER
+introStroke.Thickness = 1.8
 introStroke.Transparency = 1
 
 local introTitle = Instance.new("TextLabel")
 introTitle.Size = UDim2.new(1, 0, 0, 40)
 introTitle.Position = UDim2.new(0, 0, 0.15, 0)
 introTitle.BackgroundTransparency = 1
-introTitle.Text = "K A I R O T E C H"
-introTitle.TextColor3 = Color3.fromRGB(0, 195, 255)
-introTitle.TextSize = 22
+introTitle.Text = "✨ K A I R O T E C H ✨"
+introTitle.TextColor3 = THEME.TEXT_TITLE
+introTitle.TextSize = 20
 introTitle.Font = Enum.Font.GothamBold
 introTitle.TextTransparency = 1
 introTitle.Parent = introCard
@@ -47,10 +72,10 @@ local introSub = Instance.new("TextLabel")
 introSub.Size = UDim2.new(1, 0, 0, 20)
 introSub.Position = UDim2.new(0, 0, 0.6, 0)
 introSub.BackgroundTransparency = 1
-introSub.Text = "Modern Interface System Loaded"
-introSub.TextColor3 = Color3.fromRGB(160, 160, 175)
+introSub.Text = "Violet Cyber System Loaded"
+introSub.TextColor3 = THEME.TEXT_ACCENT
 introSub.TextSize = 11
-introSub.Font = Enum.Font.Gotham
+introSub.Font = Enum.Font.GothamMedium
 introSub.TextTransparency = 1
 introSub.Parent = introCard
 
@@ -58,33 +83,34 @@ introSub.Parent = introCard
 -- 2. АВТОРИЗАЦИЯ
 --------------------------------------------------------------------------------
 local loginFrame = Instance.new("Frame")
-loginFrame.Size = UDim2.new(0, 300, 0, 170)
-loginFrame.Position = UDim2.new(0.5, -150, 0.5, -85)
-loginFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+loginFrame.Size = UDim2.new(0, 310, 0, 180)
+loginFrame.Position = UDim2.new(0.5, -155, 0.5, -90)
+loginFrame.BackgroundColor3 = THEME.BG
 loginFrame.BorderSizePixel = 0
 loginFrame.Visible = false
 loginFrame.Parent = screenGui
 
-Instance.new("UICorner", loginFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", loginFrame).CornerRadius = UDim.new(0, 14)
 local loginStroke = Instance.new("UIStroke", loginFrame)
-loginStroke.Color = Color3.fromRGB(35, 35, 48)
+loginStroke.Color = THEME.BORDER
+loginStroke.Thickness = 1.2
 
 local loginTitle = Instance.new("TextLabel")
-loginTitle.Size = UDim2.new(1, 0, 0, 40)
+loginTitle.Size = UDim2.new(1, 0, 0, 45)
 loginTitle.BackgroundTransparency = 1
-loginTitle.Text = "Вход в систему"
-loginTitle.TextColor3 = Color3.fromRGB(240, 240, 245)
+loginTitle.Text = "💜 Вход в систему"
+loginTitle.TextColor3 = THEME.TEXT_TITLE
 loginTitle.TextSize = 16
 loginTitle.Font = Enum.Font.GothamBold
 loginTitle.Parent = loginFrame
 
 local passBox = Instance.new("TextBox")
-passBox.Size = UDim2.new(0.85, 0, 0, 36)
-passBox.Position = UDim2.new(0.075, 0, 0.32, 0)
-passBox.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
+passBox.Size = UDim2.new(0.85, 0, 0, 38)
+passBox.Position = UDim2.new(0.075, 0, 0.33, 0)
+passBox.BackgroundColor3 = THEME.PANEL
 passBox.BorderSizePixel = 0
 passBox.PlaceholderText = "Введите пароль..."
-passBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 120)
+passBox.PlaceholderColor3 = THEME.TEXT_MUTED
 passBox.Text = ""
 passBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 passBox.TextSize = 13
@@ -92,11 +118,14 @@ passBox.Font = Enum.Font.Gotham
 passBox.Parent = loginFrame
 
 Instance.new("UICorner", passBox).CornerRadius = UDim.new(0, 8)
+local passStroke = Instance.new("UIStroke", passBox)
+passStroke.Color = THEME.TEXT_ACCENT
+passStroke.Thickness = 1
 
 local submitBtn = Instance.new("TextButton")
-submitBtn.Size = UDim2.new(0.85, 0, 0, 36)
-submitBtn.Position = UDim2.new(0.075, 0, 0.65, 0)
-submitBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+submitBtn.Size = UDim2.new(0.85, 0, 0, 38)
+submitBtn.Position = UDim2.new(0.075, 0, 0.66, 0)
+submitBtn.BackgroundColor3 = THEME.BTN_ON
 submitBtn.BorderSizePixel = 0
 submitBtn.Text = "Войти"
 submitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -107,94 +136,96 @@ submitBtn.Parent = loginFrame
 Instance.new("UICorner", submitBtn).CornerRadius = UDim.new(0, 8)
 
 --------------------------------------------------------------------------------
--- 3. ГЛАВНОЕ МЕНЮ (Вкладки СВЕРХУ)
+-- 3. ГЛАВНОЕ МЕНЮ
 --------------------------------------------------------------------------------
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 480, 0, 310)
-mainFrame.Position = UDim2.new(0.5, -240, 0.5, -155)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+mainFrame.Size = UDim2.new(0, 540, 0, 340)
+mainFrame.Position = UDim2.new(0.5, -270, 0.5, -170)
+mainFrame.BackgroundColor3 = THEME.BG
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 14)
 local mainStroke = Instance.new("UIStroke", mainFrame)
-mainStroke.Color = Color3.fromRGB(0, 170, 255)
-mainStroke.Thickness = 1.2
+mainStroke.Color = THEME.BORDER
+mainStroke.Thickness = 1.5
 
 -- Шапка
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 34)
-header.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+header.Size = UDim2.new(1, 0, 0, 36)
+header.BackgroundColor3 = THEME.HEADER
 header.BorderSizePixel = 0
 header.Parent = mainFrame
 
 local menuTitle = Instance.new("TextLabel")
-menuTitle.Size = UDim2.new(1, -15, 1, 0)
-menuTitle.Position = UDim2.new(0, 12, 0, 0)
+menuTitle.Size = UDim2.new(0.5, 0, 1, 0)
+menuTitle.Position = UDim2.new(0, 14, 0, 0)
 menuTitle.BackgroundTransparency = 1
-menuTitle.Text = "KAIROTECH HUB"
-menuTitle.TextColor3 = Color3.fromRGB(0, 195, 255)
-menuTitle.TextSize = 12
+menuTitle.Text = "🔮 KAIROTECH HUB"
+menuTitle.TextColor3 = THEME.TEXT_TITLE
+menuTitle.TextSize = 13
 menuTitle.Font = Enum.Font.GothamBold
 menuTitle.TextXAlignment = Enum.TextXAlignment.Left
 menuTitle.Parent = header
 
 local keyHint = Instance.new("TextLabel")
-keyHint.Size = UDim2.new(0.5, 0, 1, 0)
-keyHint.Position = UDim2.new(0.48, 0, 0, 0)
+keyHint.Size = UDim2.new(0.4, 0, 1, 0)
+keyHint.Position = UDim2.new(0.57, 0, 0, 0)
 keyHint.BackgroundTransparency = 1
 keyHint.Text = "[RShift] Скрыть"
-keyHint.TextColor3 = Color3.fromRGB(120, 120, 140)
-keyHint.TextSize = 11
+keyHint.TextColor3 = THEME.TEXT_MUTED
+keyHint.TextSize = 10
 keyHint.Font = Enum.Font.Gotham
 keyHint.TextXAlignment = Enum.TextXAlignment.Right
 keyHint.Parent = header
 
--- Горизонтальная панель вкладок (СВЕРХУ)
+-- Панель вкладок
 local tabContainer = Instance.new("Frame")
 tabContainer.Size = UDim2.new(1, -20, 0, 32)
-tabContainer.Position = UDim2.new(0, 10, 0, 40)
+tabContainer.Position = UDim2.new(0, 10, 0, 42)
 tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = mainFrame
 
 local tabLayout = Instance.new("UIListLayout", tabContainer)
 tabLayout.FillDirection = Enum.FillDirection.Horizontal
 tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-tabLayout.Padding = UDim.new(0, 6)
+tabLayout.Padding = UDim.new(0, 4)
 
 local function createTabBtn(text, order)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0.235, 0, 1, 0)
-	btn.BackgroundColor3 = (order == 1) and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(24, 24, 32)
+	btn.Size = UDim2.new(0.158, 0, 1, 0)
+	btn.BackgroundColor3 = (order == 1) and THEME.BTN_ON or THEME.BTN_OFF
 	btn.BorderSizePixel = 0
 	btn.Text = text
-	btn.TextColor3 = (order == 1) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 180)
-	btn.TextSize = 11
+	btn.TextColor3 = (order == 1) and Color3.fromRGB(255, 255, 255) or THEME.TEXT_MUTED
+	btn.TextSize = 10
 	btn.Font = Enum.Font.GothamBold
 	btn.LayoutOrder = order
 	btn.Parent = tabContainer
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 7)
 	return btn
 end
 
 local playerTabBtn = createTabBtn("Игрок", 1)
 local babftTabBtn = createTabBtn("BABFT", 2)
-local mm2TabBtn = createTabBtn("MM2", 3)
-local brookTabBtn = createTabBtn("Brookhaven", 4)
+local desertTabBtn = createTabBtn("Desert 🏜️", 3)
+local mm2TabBtn = createTabBtn("MM2", 4)
+local brookTabBtn = createTabBtn("Brook", 5)
+local filesTabBtn = createTabBtn("Файлы", 6)
 
 --------------------------------------------------------------------------------
 -- 4. КОНТЕНТ ВКЛАДОК
 --------------------------------------------------------------------------------
 local function createContentFrame()
 	local frame = Instance.new("ScrollingFrame")
-	frame.Size = UDim2.new(1, -20, 1, -85)
-	frame.Position = UDim2.new(0, 10, 0, 78)
+	frame.Size = UDim2.new(1, -20, 1, -88)
+	frame.Position = UDim2.new(0, 10, 0, 80)
 	frame.BackgroundTransparency = 1
 	frame.BorderSizePixel = 0
 	frame.ScrollBarThickness = 3
-	frame.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
+	frame.ScrollBarImageColor3 = THEME.BORDER
 	frame.Visible = false
 	frame.Parent = mainFrame
 	
@@ -204,28 +235,64 @@ local function createContentFrame()
 	return frame
 end
 
---- ВКЛАДКА 1: ИГРОК ---
-local playerContent = createContentFrame()
-playerContent.Visible = true
-
--- Вспомогательный конструктор элементов интерфейса
 local function createToggle(text, order, parent)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(0.99, 0, 0, 34)
-	btn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+	btn.BackgroundColor3 = THEME.PANEL
 	btn.BorderSizePixel = 0
 	btn.Text = "   " .. text .. ":  ВЫКЛ"
-	btn.TextColor3 = Color3.fromRGB(180, 180, 190)
+	btn.TextColor3 = THEME.TEXT_ACCENT
 	btn.TextSize = 11
 	btn.Font = Enum.Font.GothamBold
 	btn.TextXAlignment = Enum.TextXAlignment.Left
 	btn.LayoutOrder = order
 	btn.Parent = parent
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 7)
 	return btn
 end
 
--- Полёт
+local function createTargetPanel(placeholderText, actionText, order, parent)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(0.99, 0, 0, 36)
+	container.BackgroundColor3 = THEME.PANEL
+	container.BorderSizePixel = 0
+	container.LayoutOrder = order
+	container.Parent = parent
+	Instance.new("UICorner", container).CornerRadius = UDim.new(0, 7)
+
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(0.62, 0, 0.7, 0)
+	box.Position = UDim2.new(0.02, 0, 0.15, 0)
+	box.BackgroundColor3 = THEME.HEADER
+	box.BorderSizePixel = 0
+	box.PlaceholderText = placeholderText
+	box.PlaceholderColor3 = THEME.TEXT_MUTED
+	box.Text = ""
+	box.TextColor3 = Color3.fromRGB(255, 255, 255)
+	box.TextSize = 11
+	box.Font = Enum.Font.Gotham
+	box.Parent = container
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 5)
+
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.32, 0, 0.7, 0)
+	btn.Position = UDim2.new(0.66, 0, 0.15, 0)
+	btn.BackgroundColor3 = THEME.BTN_ON
+	btn.BorderSizePixel = 0
+	btn.Text = actionText
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 10
+	btn.Font = Enum.Font.GothamBold
+	btn.Parent = container
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+
+	return box, btn
+end
+
+--- ВКЛАДКА 1: ИГРОК ---
+local playerContent = createContentFrame()
+playerContent.Visible = true
+
 local flyContainer = Instance.new("Frame")
 flyContainer.Size = UDim2.new(0.99, 0, 0, 34)
 flyContainer.BackgroundTransparency = 1
@@ -234,43 +301,43 @@ flyContainer.Parent = playerContent
 
 local flyBtn = Instance.new("TextButton")
 flyBtn.Size = UDim2.new(0.82, 0, 1, 0)
-flyBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+flyBtn.BackgroundColor3 = THEME.PANEL
 flyBtn.BorderSizePixel = 0
 flyBtn.Text = "   Режим Полёта:  ВЫКЛ"
-flyBtn.TextColor3 = Color3.fromRGB(180, 180, 190)
+flyBtn.TextColor3 = THEME.TEXT_ACCENT
 flyBtn.TextSize = 11
 flyBtn.Font = Enum.Font.GothamBold
 flyBtn.TextXAlignment = Enum.TextXAlignment.Left
 flyBtn.Parent = flyContainer
-Instance.new("UICorner", flyBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", flyBtn).CornerRadius = UDim.new(0, 7)
 
 local flyArrow = Instance.new("TextButton")
 flyArrow.Size = UDim2.new(0.16, 0, 1, 0)
 flyArrow.Position = UDim2.new(0.84, 0, 0, 0)
-flyArrow.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+flyArrow.BackgroundColor3 = THEME.BTN_OFF
 flyArrow.BorderSizePixel = 0
 flyArrow.Text = "⚙"
-flyArrow.TextColor3 = Color3.fromRGB(0, 170, 255)
+flyArrow.TextColor3 = THEME.TEXT_TITLE
 flyArrow.TextSize = 12
 flyArrow.Font = Enum.Font.GothamBold
 flyArrow.Parent = flyContainer
-Instance.new("UICorner", flyArrow).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", flyArrow).CornerRadius = UDim.new(0, 7)
 
 local flySpeedPanel = Instance.new("Frame")
 flySpeedPanel.Size = UDim2.new(0.99, 0, 0, 36)
-flySpeedPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+flySpeedPanel.BackgroundColor3 = THEME.HEADER
 flySpeedPanel.BorderSizePixel = 0
 flySpeedPanel.Visible = false
 flySpeedPanel.LayoutOrder = 2
 flySpeedPanel.Parent = playerContent
-Instance.new("UICorner", flySpeedPanel).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", flySpeedPanel).CornerRadius = UDim.new(0, 7)
 
 local flySpeedLabel = Instance.new("TextLabel")
 flySpeedLabel.Size = UDim2.new(0.6, 0, 1, 0)
 flySpeedLabel.Position = UDim2.new(0, 12, 0, 0)
 flySpeedLabel.BackgroundTransparency = 1
 flySpeedLabel.Text = "Скорость полёта:"
-flySpeedLabel.TextColor3 = Color3.fromRGB(160, 160, 180)
+flySpeedLabel.TextColor3 = THEME.TEXT_MUTED
 flySpeedLabel.TextSize = 11
 flySpeedLabel.Font = Enum.Font.Gotham
 flySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -279,16 +346,15 @@ flySpeedLabel.Parent = flySpeedPanel
 local flySpeedInput = Instance.new("TextBox")
 flySpeedInput.Size = UDim2.new(0.3, 0, 0.65, 0)
 flySpeedInput.Position = UDim2.new(0.65, 0, 0.175, 0)
-flySpeedInput.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+flySpeedInput.BackgroundColor3 = THEME.PANEL
 flySpeedInput.BorderSizePixel = 0
 flySpeedInput.Text = "50"
-flySpeedInput.TextColor3 = Color3.fromRGB(0, 195, 255)
+flySpeedInput.TextColor3 = THEME.TEXT_TITLE
 flySpeedInput.TextSize = 11
 flySpeedInput.Font = Enum.Font.GothamBold
 flySpeedInput.Parent = flySpeedPanel
-Instance.new("UICorner", flySpeedInput).CornerRadius = UDim.new(0, 4)
+Instance.new("UICorner", flySpeedInput).CornerRadius = UDim.new(0, 5)
 
--- Бег
 local walkContainer = Instance.new("Frame")
 walkContainer.Size = UDim2.new(0.99, 0, 0, 34)
 walkContainer.BackgroundTransparency = 1
@@ -297,43 +363,43 @@ walkContainer.Parent = playerContent
 
 local walkBtn = Instance.new("TextButton")
 walkBtn.Size = UDim2.new(0.82, 0, 1, 0)
-walkBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+walkBtn.BackgroundColor3 = THEME.PANEL
 walkBtn.BorderSizePixel = 0
 walkBtn.Text = "   Ускорение бега:  ВЫКЛ"
-walkBtn.TextColor3 = Color3.fromRGB(180, 180, 190)
+walkBtn.TextColor3 = THEME.TEXT_ACCENT
 walkBtn.TextSize = 11
 walkBtn.Font = Enum.Font.GothamBold
 walkBtn.TextXAlignment = Enum.TextXAlignment.Left
 walkBtn.Parent = walkContainer
-Instance.new("UICorner", walkBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", walkBtn).CornerRadius = UDim.new(0, 7)
 
 local walkArrow = Instance.new("TextButton")
 walkArrow.Size = UDim2.new(0.16, 0, 1, 0)
 walkArrow.Position = UDim2.new(0.84, 0, 0, 0)
-walkArrow.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+walkArrow.BackgroundColor3 = THEME.BTN_OFF
 walkArrow.BorderSizePixel = 0
 walkArrow.Text = "⚙"
-walkArrow.TextColor3 = Color3.fromRGB(0, 170, 255)
+walkArrow.TextColor3 = THEME.TEXT_TITLE
 walkArrow.TextSize = 12
 walkArrow.Font = Enum.Font.GothamBold
 walkArrow.Parent = walkContainer
-Instance.new("UICorner", walkArrow).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", walkArrow).CornerRadius = UDim.new(0, 7)
 
 local walkSpeedPanel = Instance.new("Frame")
 walkSpeedPanel.Size = UDim2.new(0.99, 0, 0, 36)
-walkSpeedPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+walkSpeedPanel.BackgroundColor3 = THEME.HEADER
 walkSpeedPanel.BorderSizePixel = 0
 walkSpeedPanel.Visible = false
 walkSpeedPanel.LayoutOrder = 4
 walkSpeedPanel.Parent = playerContent
-Instance.new("UICorner", walkSpeedPanel).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", walkSpeedPanel).CornerRadius = UDim.new(0, 7)
 
 local walkSpeedLabel = Instance.new("TextLabel")
 walkSpeedLabel.Size = UDim2.new(0.6, 0, 1, 0)
 walkSpeedLabel.Position = UDim2.new(0, 12, 0, 0)
 walkSpeedLabel.BackgroundTransparency = 1
 walkSpeedLabel.Text = "Скорость бега:"
-walkSpeedLabel.TextColor3 = Color3.fromRGB(160, 160, 180)
+walkSpeedLabel.TextColor3 = THEME.TEXT_MUTED
 walkSpeedLabel.TextSize = 11
 walkSpeedLabel.Font = Enum.Font.Gotham
 walkSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -342,33 +408,54 @@ walkSpeedLabel.Parent = walkSpeedPanel
 local walkSpeedInput = Instance.new("TextBox")
 walkSpeedInput.Size = UDim2.new(0.3, 0, 0.65, 0)
 walkSpeedInput.Position = UDim2.new(0.65, 0, 0.175, 0)
-walkSpeedInput.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+walkSpeedInput.BackgroundColor3 = THEME.PANEL
 walkSpeedInput.BorderSizePixel = 0
 walkSpeedInput.Text = "50"
-walkSpeedInput.TextColor3 = Color3.fromRGB(0, 195, 255)
+walkSpeedInput.TextColor3 = THEME.TEXT_TITLE
 walkSpeedInput.TextSize = 11
 walkSpeedInput.Font = Enum.Font.GothamBold
 walkSpeedInput.Parent = walkSpeedPanel
-Instance.new("UICorner", walkSpeedInput).CornerRadius = UDim.new(0, 4)
-
+Instance.new("UICorner", walkSpeedInput).CornerRadius = UDim.new(0, 5)
 
 --- ВКЛАДКА 2: BABFT ---
 local babftContent = createContentFrame()
 local farmBtn = createToggle("Авто-Фарм золота (2.4s)", 1, babftContent)
 local jesusBtn = createToggle("Бесконечный кислород", 2, babftContent)
 local chestTpBtn = createToggle("Телепорт к сокровищу", 3, babftContent)
+local flingBox, flingBtn = createTargetPanel("Ник для Флинга...", "💥 Флинг: ВЫКЛ", 4, babftContent)
 
+--- ВКЛАДКА 3: DESERT ---
+local desertContent = createContentFrame()
+local stealEggBtn = createToggle("Украсть Яйцо (Steal Egg)", 1, desertContent)
+local tpNickBox, tpNickBtn = createTargetPanel("Ник для телепорта...", "⚡ ТП к игроку", 2, desertContent)
+local specBox, specBtn = createTargetPanel("Ник для наблюдения...", "👁️ Следить: ВЫКЛ", 3, desertContent)
+local aimbotBtn = createToggle("🎯 Аимбот (Aimbot Lock)", 4, desertContent)
+local explodeBox, explodeBtn = createTargetPanel("Ник для взрыва...", "💣 Взорвать", 5, desertContent)
 
---- ВКЛАДКА 3: MURDER MYSTERY 2 ---
+--- ВКЛАДКА 4: MURDER MYSTERY 2 ---
 local mm2Content = createContentFrame()
 local mm2EspBtn = createToggle("ESP Ролей игроков", 1, mm2Content)
 local mm2TpLobbyBtn = createToggle("Телепорт в Лобби", 2, mm2Content)
 
-
---- ВКЛАДКА 4: BROOKHAVEN ---
+--- ВКЛАДКА 5: BROOKHAVEN ---
 local brookContent = createContentFrame()
 local infJumpBtn = createToggle("Бесконечный прыжок", 1, brookContent)
 local tpBankBtn = createToggle("Телепорт в Банк", 2, brookContent)
+
+--- ВКЛАДКА 6: ФАЙЛЫ (DARK DEX) ---
+local filesContent = createContentFrame()
+
+local dexBtn = Instance.new("TextButton")
+dexBtn.Size = UDim2.new(0.99, 0, 0, 36)
+dexBtn.BackgroundColor3 = THEME.BTN_ON
+dexBtn.BorderSizePixel = 0
+dexBtn.Text = "🚀 Запустить Dark Dex Explorer"
+dexBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+dexBtn.TextSize = 12
+dexBtn.Font = Enum.Font.GothamBold
+dexBtn.LayoutOrder = 1
+dexBtn.Parent = filesContent
+Instance.new("UICorner", dexBtn).CornerRadius = UDim.new(0, 7)
 
 --------------------------------------------------------------------------------
 -- 5. ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
@@ -376,19 +463,21 @@ local tpBankBtn = createToggle("Телепорт в Банк", 2, brookContent)
 local allTabs = {
 	{btn = playerTabBtn, content = playerContent},
 	{btn = babftTabBtn, content = babftContent},
+	{btn = desertTabBtn, content = desertContent},
 	{btn = mm2TabBtn, content = mm2Content},
-	{btn = brookTabBtn, content = brookContent}
+	{btn = brookTabBtn, content = brookContent},
+	{btn = filesTabBtn, content = filesContent}
 }
 
 for _, tab in ipairs(allTabs) do
 	tab.btn.MouseButton1Click:Connect(function()
 		for _, t in ipairs(allTabs) do
 			t.content.Visible = false
-			t.btn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
-			t.btn.TextColor3 = Color3.fromRGB(160, 160, 180)
+			t.btn.BackgroundColor3 = THEME.BTN_OFF
+			t.btn.TextColor3 = THEME.TEXT_MUTED
 		end
 		tab.content.Visible = true
-		tab.btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+		tab.btn.BackgroundColor3 = THEME.BTN_ON
 		tab.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end)
 end
@@ -396,11 +485,9 @@ end
 --------------------------------------------------------------------------------
 -- 6. ЛОГИКА ФУНКЦИЙ
 --------------------------------------------------------------------------------
-
--- Вспомогательное обновление внешнего вида переключателей
 local function updateToggleVisual(btn, name, state)
 	btn.Text = state and ("   " .. name .. ":  ВКЛ") or ("   " .. name .. ":  ВЫКЛ")
-	btn.TextColor3 = state and Color3.fromRGB(0, 230, 130) or Color3.fromRGB(180, 180, 190)
+	btn.TextColor3 = state and THEME.SUCCESS or THEME.TEXT_ACCENT
 end
 
 -- Перетаскивание
@@ -425,7 +512,6 @@ UserInputService.InputChanged:Connect(function(input)
 	end
 end)
 
--- Выпадающие меню настроек
 flyArrow.MouseButton1Click:Connect(function() flySpeedPanel.Visible = not flySpeedPanel.Visible end)
 walkArrow.MouseButton1Click:Connect(function() walkSpeedPanel.Visible = not walkSpeedPanel.Visible end)
 
@@ -511,6 +597,156 @@ walkSpeedInput.FocusLost:Connect(function()
 	else
 		walkSpeedInput.Text = tostring(walkSpeedVal)
 	end
+end)
+
+-- DESERT: ТЕЛЕПОРТ ПО НИКУ
+tpNickBtn.MouseButton1Click:Connect(function()
+	local target = getPlayerByPartialName(tpNickBox.Text)
+	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+		local char = player.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			char.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 2, 0)
+		end
+	end
+end)
+
+-- DESERT: НАБЛЮДАТЬ (SPECTATE)
+local spectating = false
+specBtn.MouseButton1Click:Connect(function()
+	spectating = not spectating
+	local camera = workspace.CurrentCamera
+	if spectating then
+		local target = getPlayerByPartialName(specBox.Text)
+		if target and target.Character and target.Character:FindFirstChildOfClass("Humanoid") then
+			camera.CameraSubject = target.Character.Humanoid
+			specBtn.Text = "👁️ Следить: ВКЛ"
+			specBtn.BackgroundColor3 = THEME.SUCCESS
+		else
+			spectating = false
+			specBtn.Text = "❌ Игрок не найден"
+			task.wait(1)
+			specBtn.Text = "👁️ Следить: ВЫКЛ"
+			specBtn.BackgroundColor3 = THEME.BTN_ON
+		end
+	else
+		if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+			camera.CameraSubject = player.Character.Humanoid
+		end
+		specBtn.Text = "👁️ Следить: ВЫКЛ"
+		specBtn.BackgroundColor3 = THEME.BTN_ON
+	end
+end)
+
+-- DESERT: АИМБОТ
+local aimbotActive = false
+aimbotBtn.MouseButton1Click:Connect(function()
+	aimbotActive = not aimbotActive
+	updateToggleVisual(aimbotBtn, "🎯 Аимбот (Aimbot Lock)", aimbotActive)
+
+	task.spawn(function()
+		while aimbotActive do
+			local camera = workspace.CurrentCamera
+			local closestPlayer = nil
+			local shortestDistance = math.huge
+
+			for _, p in ipairs(Players:GetPlayers()) do
+				if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
+					local pos, onScreen = camera:WorldToViewportPoint(p.Character.Head.Position)
+					if onScreen then
+						local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)).Magnitude
+						if dist < shortestDistance then
+							shortestDistance = dist
+							closestPlayer = p
+						end
+					end
+				end
+			end
+
+			if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
+				camera.CFrame = CFrame.new(camera.CFrame.Position, closestPlayer.Character.Head.Position)
+			end
+			RunService.RenderStepped:Wait()
+		end
+	end)
+end)
+
+-- DESERT: ВЗОРВАТЬ
+explodeBtn.MouseButton1Click:Connect(function()
+	local target = getPlayerByPartialName(explodeBox.Text)
+	if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+		local targetPos = target.Character.HumanoidRootPart.Position
+		local exp = Instance.new("Explosion")
+		exp.Position = targetPos
+		exp.BlastRadius = 10
+		exp.BlastPressure = 500000
+		exp.Parent = workspace
+	end
+end)
+
+-- DESERT: УКРАСТЬ ЯЙЦО
+local autoStealEgg = false
+stealEggBtn.MouseButton1Click:Connect(function()
+	autoStealEgg = not autoStealEgg
+	updateToggleVisual(stealEggBtn, "Украсть Яйцо (Steal Egg)", autoStealEgg)
+
+	task.spawn(function()
+		while autoStealEgg do
+			local char = player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				local root = char.HumanoidRootPart
+				for _, obj in ipairs(workspace:GetDescendants()) do
+					if not autoStealEgg then break end
+					if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("яйцо")) then
+						root.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
+						task.wait(0.4)
+						if firetouchinterest then
+							firetouchinterest(root, obj, 0)
+							firetouchinterest(root, obj, 1)
+						end
+						local prompt = obj:FindFirstChildOfClass("ProximityPrompt") or obj.Parent:FindFirstChildOfClass("ProximityPrompt")
+						if prompt and fireproximityprompt then
+							fireproximityprompt(prompt)
+						end
+					end
+				end
+			end
+			task.wait(1)
+		end
+	end)
+end)
+
+-- BABFT: ФЛИНГ ПО НИКУ
+local flinging = false
+flingBtn.MouseButton1Click:Connect(function()
+	flinging = not flinging
+	if flinging then
+		flingBtn.Text = "💥 Флинг: ВКЛ"
+		flingBtn.BackgroundColor3 = THEME.SUCCESS
+	else
+		flingBtn.Text = "💥 Флинг: ВЫКЛ"
+		flingBtn.BackgroundColor3 = THEME.BTN_ON
+	end
+
+	task.spawn(function()
+		while flinging do
+			local target = getPlayerByPartialName(flingBox.Text)
+			local char = player.Character
+			if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and char and char:FindFirstChild("HumanoidRootPart") then
+				local root = char.HumanoidRootPart
+				local tRoot = target.Character.HumanoidRootPart
+
+				-- Вращение и импульс для флинга
+				root.Velocity = Vector3.new(999999, 999999, 999999)
+				root.RotVelocity = Vector3.new(999999, 999999, 999999)
+				root.CFrame = tRoot.CFrame + Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
+			end
+			RunService.RenderStepped:Wait()
+		end
+		if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			player.Character.HumanoidRootPart.Velocity = Vector3.zero
+			player.Character.HumanoidRootPart.RotVelocity = Vector3.zero
+		end
+	end)
 end)
 
 -- BABFT
@@ -652,8 +888,33 @@ tpBankBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- ФАЙЛЫ: DARK DEX
+dexBtn.MouseButton1Click:Connect(function()
+	dexBtn.Text = "⏳ Загрузка Dark Dex..."
+	dexBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+	
+	task.spawn(function()
+		local success, err = pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/perfectusmim1/darkdex/refs/heads/main/darkdexp"))()
+		end)
+		
+		if success then
+			dexBtn.Text = "✅ Dark Dex Запущен!"
+			dexBtn.BackgroundColor3 = THEME.SUCCESS
+		else
+			dexBtn.Text = "❌ Ошибка загрузки"
+			dexBtn.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
+			warn("Dark Dex Load Error: " .. tostring(err))
+		end
+		
+		task.wait(2)
+		dexBtn.Text = "🚀 Запустить Dark Dex Explorer"
+		dexBtn.BackgroundColor3 = THEME.BTN_ON
+	end)
+end)
+
 --------------------------------------------------------------------------------
--- 7. ЗАПУСК
+-- 7. ЗАПУСК И АНИМАЦИИ
 --------------------------------------------------------------------------------
 TweenService:Create(introCard, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
 TweenService:Create(introStroke, TweenInfo.new(0.5), {Transparency = 0}):Play()
