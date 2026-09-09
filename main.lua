@@ -56,7 +56,7 @@ local menuTitle = Instance.new("TextLabel")
 menuTitle.Size = UDim2.new(0.8, 0, 1, 0)
 menuTitle.Position = UDim2.new(0, 12, 0, 0)
 menuTitle.BackgroundTransparency = 1
-menuTitle.Text = "⚡ BABFT & PLAYER HUB ⚡"
+menuTitle.Text = "🔮 KAIROTECH HUB (Игрок & BABFT)"
 menuTitle.TextColor3 = THEME.TEXT_TITLE
 menuTitle.TextSize = 13
 menuTitle.Font = Enum.Font.GothamBold
@@ -64,7 +64,7 @@ menuTitle.TextXAlignment = Enum.TextXAlignment.Left
 menuTitle.ZIndex = 12
 menuTitle.Parent = header
 
--- Переключатель вкладок
+-- Контейнер вкладок
 local tabContainer = Instance.new("Frame")
 tabContainer.Size = UDim2.new(1, -20, 0, 34)
 tabContainer.Position = UDim2.new(0, 10, 0, 44)
@@ -195,15 +195,15 @@ local function updateToggleVisual(btn, name, state)
 end
 
 --------------------------------------------------------------------------------
--- 🟢 РАЗДЕЛ 1: ИГРОК (7 ФУНКЦИЙ)
+-- 🟢 РАЗДЕЛ 1: ИГРОК
 --------------------------------------------------------------------------------
 
 -- 1. Noclip
 local noclip = false
-local noclipBtn = createToggle("1. Noclip (Проход сквозь стены)", 1, tabsContent[1])
+local noclipBtn = createToggle("1. Noclip (Сквозь стены)", 1, tabsContent[1])
 noclipBtn.Activated:Connect(function()
 	noclip = not noclip
-	updateToggleVisual(noclipBtn, "1. Noclip (Проход сквозь стены)", noclip)
+	updateToggleVisual(noclipBtn, "1. Noclip (Сквозь стены)", noclip)
 end)
 RunService.Stepped:Connect(function()
 	if noclip and player.Character then
@@ -216,10 +216,10 @@ end)
 -- 2. Fly (Полёт)
 local flying = false
 local flySpeed = 50
-local flyBtn = createToggle("2. Fly (Полёт на клавиши)", 2, tabsContent[1])
+local flyBtn = createToggle("2. Fly (Полёт)", 2, tabsContent[1])
 flyBtn.Activated:Connect(function()
 	flying = not flying
-	updateToggleVisual(flyBtn, "2. Fly (Полёт на клавиши)", flying)
+	updateToggleVisual(flyBtn, "2. Fly (Полёт)", flying)
 	task.spawn(function()
 		while flying do
 			local char = player.Character
@@ -242,10 +242,10 @@ end)
 
 -- 3. Infinite Jump
 local infJump = false
-local infJumpBtn = createToggle("3. Infinite Jump (Бесконечный прыжок)", 3, tabsContent[1])
+local infJumpBtn = createToggle("3. Infinite Jump", 3, tabsContent[1])
 infJumpBtn.Activated:Connect(function()
 	infJump = not infJump
-	updateToggleVisual(infJumpBtn, "3. Infinite Jump (Бесконечный прыжок)", infJump)
+	updateToggleVisual(infJumpBtn, "3. Infinite Jump", infJump)
 end)
 UserInputService.JumpRequest:Connect(function()
 	if infJump and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
@@ -255,10 +255,10 @@ end)
 
 -- 4. ESP Players
 local espActive = false
-local espBtn = createToggle("4. ESP Игроков (Подсветка)", 4, tabsContent[1])
+local espBtn = createToggle("4. ESP Игроков", 4, tabsContent[1])
 espBtn.Activated:Connect(function()
 	espActive = not espActive
-	updateToggleVisual(espBtn, "4. ESP Игроков (Подсветка)", espActive)
+	updateToggleVisual(espBtn, "4. ESP Игроков", espActive)
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p ~= player and p.Character then
 			if espActive then
@@ -277,17 +277,17 @@ end)
 
 -- 5. Fullbright
 local fullbright = false
-local fbBtn = createToggle("5. Fullbright (Без темноты)", 5, tabsContent[1])
+local fbBtn = createToggle("5. Fullbright (Подсветка)", 5, tabsContent[1])
 fbBtn.Activated:Connect(function()
 	fullbright = not fullbright
-	updateToggleVisual(fbBtn, "5. Fullbright (Без темноты)", fullbright)
+	updateToggleVisual(fbBtn, "5. Fullbright (Подсветка)", fullbright)
 	Lighting.Brightness = fullbright and 2 or 1
 	Lighting.ClockTime = fullbright and 14 or 12
 	Lighting.GlobalShadows = not fullbright
 end)
 
--- 6. Изменение скорости
-local speedBox, speedBtn = createInputPanel("Скорость (напр. 50)", "6. Установить скорость", 6, tabsContent[1])
+-- 6. Скорость
+local speedBox, speedBtn = createInputPanel("Скорость (напр. 50)", "6. Применить", 6, tabsContent[1])
 speedBtn.Activated:Connect(function()
 	local val = tonumber(speedBox.Text)
 	if val and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
@@ -295,8 +295,8 @@ speedBtn.Activated:Connect(function()
 	end
 end)
 
--- 7. Изменение высоты прыжка
-local jumpBox, jumpBtn = createInputPanel("Сила прыжка (напр. 100)", "7. Установить прыжок", 7, tabsContent[1])
+-- 7. Прыжок
+local jumpBox, jumpBtn = createInputPanel("Высота прыжка (напр. 100)", "7. Применить", 7, tabsContent[1])
 jumpBtn.Activated:Connect(function()
 	local val = tonumber(jumpBox.Text)
 	if val and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
@@ -305,15 +305,15 @@ jumpBtn.Activated:Connect(function()
 end)
 
 --------------------------------------------------------------------------------
--- 🛶 РАЗДЕЛ 2: ПОСТРОЙ КОРАБЛЬ (7 ФУНКЦИЙ)
+-- 🛶 РАЗДЕЛ 2: ПОСТРОЙ КОРАБЛЬ (BABFT)
 --------------------------------------------------------------------------------
 
--- 1. Авто-Фарм в воздухе (Hover Air Farm)
+-- 1. Авто-Фарм с полётом в воздухе
 local autoGoldAir = false
-local autoGoldBtn = createToggle("1. Авто-Фарм Золота (Зависнуть в воздухе)", 1, tabsContent[2])
+local autoGoldBtn = createToggle("1. Авто-Фарм (В воздухе над водой)", 1, tabsContent[2])
 autoGoldBtn.Activated:Connect(function()
 	autoGoldAir = not autoGoldAir
-	updateToggleVisual(autoGoldBtn, "1. Авто-Фарм Золота (Зависнуть в воздухе)", autoGoldAir)
+	updateToggleVisual(autoGoldBtn, "1. Авто-Фарм (В воздухе над водой)", autoGoldAir)
 	
 	task.spawn(function()
 		while autoGoldAir do
@@ -322,7 +322,6 @@ autoGoldBtn.Activated:Connect(function()
 				local hrp = char.HumanoidRootPart
 				local stages = workspace:FindFirstChild("BoatStages") and workspace.BoatStages:FindFirstChild("NormalStages")
 				
-				-- Держим в воздухе через BodyVelocity
 				local bv = Instance.new("BodyVelocity")
 				bv.MaxForce = Vector3.new(0, math.huge, 0)
 				bv.Velocity = Vector3.new(0, 0, 0)
@@ -333,13 +332,11 @@ autoGoldBtn.Activated:Connect(function()
 						if not autoGoldAir then break end
 						local stage = stages:FindFirstChild("CaveStage" .. tostring(i))
 						if stage and stage:FindFirstChild("DarknessPart") then
-							-- Зависаем на 50 блоков ВЫШЕ этапа в воздухе
-							hrp.CFrame = stage.DarknessPart.CFrame * CFrame.new(0, 50, 0)
+							hrp.CFrame = stage.DarknessPart.CFrame * CFrame.new(0, 60, 0)
 							task.wait(0.4)
 						end
 					end
 					
-					-- ТП прямо к конечному сундуку
 					local endChest = stages:FindFirstChild("TheEnd") and stages.TheEnd:FindFirstChild("GoldenChest")
 					if endChest and endChest:FindFirstChild("Trigger") then
 						hrp.CFrame = endChest.Trigger.CFrame
@@ -353,12 +350,12 @@ autoGoldBtn.Activated:Connect(function()
 	end)
 end)
 
--- 2. Auto Build (Авто-Строительство / Сетка блоков)
+-- 2. Auto Build
 local autoBuild = false
-local autoBuildBtn = createToggle("2. Auto Build (Авто-Сетка блоков)", 2, tabsContent[2])
+local autoBuildBtn = createToggle("2. Auto Build (Сетка блоков)", 2, tabsContent[2])
 autoBuildBtn.Activated:Connect(function()
 	autoBuild = not autoBuild
-	updateToggleVisual(autoBuildBtn, "2. Auto Build (Авто-Сетка блоков)", autoBuild)
+	updateToggleVisual(autoBuildBtn, "2. Auto Build (Сетка блоков)", autoBuild)
 	
 	task.spawn(function()
 		if autoBuild then
@@ -368,7 +365,6 @@ autoBuildBtn.Activated:Connect(function()
 				for x = -2, 2 do
 					for z = -2, 2 do
 						if not autoBuild then break end
-						local buildingFolder = workspace:FindFirstChild(player.Name .. "Boat") or workspace:FindFirstChild("Blocks")
 						local item = char:FindFirstChildOfClass("Tool")
 						if item and item:FindFirstChild("RF") then
 							item.RF:InvokeServer(item.Name, 1, startPos * CFrame.new(x * 4, -2, z * 4))
@@ -381,12 +377,12 @@ autoBuildBtn.Activated:Connect(function()
 	end)
 end)
 
--- 3. Бесконечный кислород / Нет урона от воды
+-- 3. Бесконечный кислород
 local noWaterDamage = false
-local waterBtn = createToggle("3. Бесконечный кислород (Без урона воды)", 3, tabsContent[2])
+local waterBtn = createToggle("3. Убрать урон от воды", 3, tabsContent[2])
 waterBtn.Activated:Connect(function()
 	noWaterDamage = not noWaterDamage
-	updateToggleVisual(waterBtn, "3. Бесконечный кислород (Без урона воды)", noWaterDamage)
+	updateToggleVisual(waterBtn, "3. Убрать урон от воды", noWaterDamage)
 	for _, v in ipairs(workspace:GetDescendants()) do
 		if v.Name == "Water" or v.Name == "WaterPart" then
 			v.CanTouch = not noWaterDamage
@@ -394,8 +390,8 @@ waterBtn.Activated:Connect(function()
 	end
 end)
 
--- 4. Мгновенный телепорт к сокровищу
-local chestTpBtn = createToggle("4. Мгновенный ТП к сундуку", 4, tabsContent[2])
+-- 4. Мгновенный ТП к сундуку
+local chestTpBtn = createToggle("4. ТП к финишному сундуку", 4, tabsContent[2])
 chestTpBtn.Activated:Connect(function()
 	local char = player.Character
 	if char and char:FindFirstChild("HumanoidRootPart") then
@@ -406,7 +402,7 @@ chestTpBtn.Activated:Connect(function()
 	end
 end)
 
--- 5. Телепорт на свою строительную базу
+-- 5. Телепорт на базу
 local baseTpBtn = createToggle("5. Телепорт на свою базу", 5, tabsContent[2])
 baseTpBtn.Activated:Connect(function()
 	local char = player.Character
@@ -420,20 +416,20 @@ baseTpBtn.Activated:Connect(function()
 	end
 end)
 
--- 6. Сохранить текущую позицию (Save Pos)
+-- 6. Сохранить позицию
 local savedCFrame = nil
-local savePosBtn = createToggle("6. Сохранить позицию (Save Pos)", 6, tabsContent[2])
+local savePosBtn = createToggle("6. Сохранить позицию", 6, tabsContent[2])
 savePosBtn.Activated:Connect(function()
 	if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
 		savedCFrame = player.Character.HumanoidRootPart.CFrame
-		savePosBtn.Text = "   6. Позиция Сохранена!"
+		savePosBtn.Text = "   6. Позиция сохранена!"
 		task.wait(1)
-		savePosBtn.Text = "   6. Сохранить позицию (Save Pos): ВЫКЛ"
+		savePosBtn.Text = "   6. Сохранить позицию: ВЫКЛ"
 	end
 end)
 
--- 7. Загрузить/Вернуться на позицию (Load Pos)
-local loadPosBtn = createToggle("7. Вернуться на позицию (Load Pos)", 7, tabsContent[2])
+-- 7. Вернуться на позицию
+local loadPosBtn = createToggle("7. Вернуться на позицию", 7, tabsContent[2])
 loadPosBtn.Activated:Connect(function()
 	if savedCFrame and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
 		player.Character.HumanoidRootPart.CFrame = savedCFrame
@@ -441,7 +437,7 @@ loadPosBtn.Activated:Connect(function()
 end)
 
 --------------------------------------------------------------------------------
--- 🖱️ ПЕРЕТАСКИВАНИЕ UI
+-- 🖱️ ПЕРЕТАСКИВАНИЕ UI (DRAGGING)
 --------------------------------------------------------------------------------
 local isDragging = false
 local dragOffset = Vector2.new()
