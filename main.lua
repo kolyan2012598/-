@@ -1,6 +1,5 @@
 --------------------------------------------------------------------------------
--- ✨ KAIROTECH HUB — v3.6 (UI SHELL + STAGE FARM + BOAT FLY WITH SPEED)
--- Автофарм по этапам + Умный полет на корабле (Пробел = вверх, без прыжков при полете, регулировка скорости)
+-- ✨ KAIROTECH HUB — v4.4 (PLAYER FLY + TARGET FLING + BOAT FLY + CUSTOM SPEED + KEYBIND)
 --------------------------------------------------------------------------------
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
@@ -80,7 +79,7 @@ end
 --------------------------------------------------------------------------------
 -- 📱 ГЛАВНОЕ ОКНО
 --------------------------------------------------------------------------------
-local WINDOW_W, WINDOW_H = 500, 440
+local WINDOW_W, WINDOW_H = 500, 460
 local HEADER_H = 48
 local TABBAR_H = 64
 
@@ -92,7 +91,7 @@ mainFrame.BorderSizePixel = 0
 mainFrame.ZIndex = 10
 mainFrame.Parent = screenGui
 round(mainFrame, 14)
-local mainStroke = stroke(mainFrame, THEME.BORDER, 1.5, 0)
+stroke(mainFrame, THEME.BORDER, 1.5, 0)
 
 local mainScale = Instance.new("UIScale")
 mainScale.Parent = mainFrame
@@ -159,7 +158,7 @@ local menuSubtitle = Instance.new("TextLabel")
 menuSubtitle.Size = UDim2.new(0.6, 0, 0, 12)
 menuSubtitle.Position = UDim2.new(0, 48, 0, 28)
 menuSubtitle.BackgroundTransparency = 1
-menuSubtitle.Text = "v3.6 • RightShift — скрыть/показать"
+menuSubtitle.Text = "v4.4 • Полный функционал"
 menuSubtitle.TextColor3 = THEME.TEXT_MUTED
 menuSubtitle.TextSize = 9
 menuSubtitle.Font = Enum.Font.Gotham
@@ -234,61 +233,8 @@ local pages = {
 }
 pages[1].Visible = true
 
-local function createEmptyPlaceholder(page, icon, title, subtitle)
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -30, 0, 200)
-    container.BackgroundTransparency = 1
-    container.ZIndex = 13
-    container.Parent = page
-
-    local circle = Instance.new("Frame")
-    circle.AnchorPoint = Vector2.new(0.5, 0.5)
-    circle.Position = UDim2.new(0.5, 0, 0.35, 0)
-    circle.Size = UDim2.new(0, 76, 0, 76)
-    circle.BackgroundColor3 = Color3.new(1, 1, 1)
-    circle.BorderSizePixel = 0
-    circle.ZIndex = 13
-    circle.Parent = container
-    round(circle, 99)
-    gradient(circle)
-
-    local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(1, 0, 1, 0)
-    iconLabel.BackgroundTransparency = 1
-    iconLabel.Text = icon
-    iconLabel.TextSize = 32
-    iconLabel.ZIndex = 14
-    iconLabel.Parent = circle
-
-    local t1 = Instance.new("TextLabel")
-    t1.AnchorPoint = Vector2.new(0.5, 0)
-    t1.Position = UDim2.new(0.5, 0, 0.35, 52)
-    t1.Size = UDim2.new(1, 0, 0, 20)
-    t1.BackgroundTransparency = 1
-    t1.Text = title
-    t1.TextColor3 = THEME.TEXT_TITLE
-    t1.TextSize = 15
-    t1.Font = Enum.Font.GothamBold
-    t1.ZIndex = 13
-    t1.Parent = container
-
-    local t2 = Instance.new("TextLabel")
-    t2.AnchorPoint = Vector2.new(0.5, 0)
-    t2.Position = UDim2.new(0.5, 0, 0.35, 76)
-    t2.Size = UDim2.new(1, 0, 0, 16)
-    t2.BackgroundTransparency = 1
-    t2.Text = subtitle
-    t2.TextColor3 = THEME.TEXT_MUTED
-    t2.TextSize = 11
-    t2.Font = Enum.Font.Gotham
-    t2.ZIndex = 13
-    t2.Parent = container
-end
-
-createEmptyPlaceholder(pages[1], "🏃", "Игрок", "Этот раздел пока пуст")
-
 --------------------------------------------------------------------------------
--- 🎛️ СОЗДАНИЕ ПЕРЕКЛЮЧАТЕЛЕЙ (TOGGLE)
+-- 🎛️ ХЕЛПЕР СОЗДАНИЯ ПЕРЕКЛЮЧАТЕЛЕЙ (TOGGLE)
 --------------------------------------------------------------------------------
 local function createToggle(parent, title, subtitle, callback)
     local card = Instance.new("Frame")
@@ -360,64 +306,249 @@ local function createToggle(parent, title, subtitle, callback)
 end
 
 --------------------------------------------------------------------------------
--- 1️⃣ АВТО-ФАРМ ПО ЭТАПАМ (В воздухе над этапами с задержкой)
+-- 👤 РАЗДЕЛ 1: ИГРОК (Полёт + Флинг по нику)
 --------------------------------------------------------------------------------
-local autoGoldAir = false
 
-createToggle(pages[2], "1. Авто-Фарм (В воздухе по этапам)", "Летит по этапам CaveStage1-10 с задержкой на каждой точке", function(enabled)
-    autoGoldAir = enabled
-    if not autoGoldAir then return end
-
+-- 1. Полёт игрока
+local playerFlyEnabled = false
+createToggle(pages[1], "1. Полёт Игрока (Fly)", "Свободный полет персонажа в воздухе", function(enabled)
+    playerFlyEnabled = enabled
     task.spawn(function()
-        while autoGoldAir do
+        while playerFlyEnabled do
             local char = player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                local hrp = char.HumanoidRootPart
-                local stages = Workspace:FindFirstChild("BoatStages") and Workspace.BoatStages:FindFirstChild("NormalStages")
-                
-                local bv = Instance.new("BodyVelocity")
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+            if hrp and humanoid then
+                local bv = hrp:FindFirstChild("KairoPlayerFlyBV") or Instance.new("BodyVelocity")
+                bv.Name = "KairoPlayerFlyBV"
                 bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                bv.Velocity = Vector3.new(0, 0, 0)
                 bv.Parent = hrp
-                
-                if stages then
-                    for i = 1, 10 do
-                        if not autoGoldAir then break end
-                        local stage = stages:FindFirstChild("CaveStage" .. tostring(i))
-                        if stage and stage:FindFirstChild("DarknessPart") then
-                            local targetCFrame = stage.DarknessPart.CFrame * CFrame.new(0, 60, 0)
-                            local startCFrame = hrp.CFrame
-                            local t = 0
-                            while t < 0.6 and autoGoldAir do
-                                local dt = RunService.RenderStepped:Wait()
-                                t = t + dt
-                                hrp.CFrame = startCFrame:Lerp(targetCFrame, math.clamp(t / 0.6, 0, 1))
-                            end
-                            
-                            local waitTime = 0
-                            while waitTime < 1 and autoGoldAir do
-                                waitTime = waitTime + RunService.RenderStepped:Wait()
-                                hrp.CFrame = targetCFrame
-                            end
-                        end
-                    end
+
+                local bg = hrp:FindFirstChild("KairoPlayerFlyBG") or Instance.new("BodyGyro")
+                bg.Name = "KairoPlayerFlyBG"
+                bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+                bg.Parent = hrp
+
+                while playerFlyEnabled and hrp.Parent do
+                    local cam = Workspace.CurrentCamera
+                    local moveDir = Vector3.new(0, 0, 0)
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+
+                    bv.Velocity = moveDir * 50
+                    bg.CFrame = cam.CFrame
+                    RunService.RenderStepped:Wait()
                 end
-                
                 if bv then bv:Destroy() end
+                if bg then bg:Destroy() end
             end
-            task.wait(3)
+            task.wait(0.2)
         end
     end)
 end)
 
+-- 2. Флинг игрока по нику
+local flingCard = Instance.new("Frame")
+flingCard.Size = UDim2.new(1, -30, 0, 95)
+flingCard.BackgroundColor3 = THEME.PANEL
+flingCard.BorderSizePixel = 0
+flingCard.ZIndex = 13
+flingCard.Parent = pages[1]
+round(flingCard, 10)
+stroke(flingCard, THEME.BORDER, 1, 0.5)
+
+local flingTitleLbl = Instance.new("TextLabel")
+flingTitleLbl.Size = UDim2.new(1, -20, 0, 20)
+flingTitleLbl.Position = UDim2.new(0, 14, 0, 10)
+flingTitleLbl.BackgroundTransparency = 1
+flingTitleLbl.Text = "2. Флинг Игрока (Раскидать по нику)"
+flingTitleLbl.TextColor3 = THEME.TEXT_TITLE
+flingTitleLbl.TextSize = 13
+flingTitleLbl.Font = Enum.Font.GothamBold
+flingTitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+flingTitleLbl.ZIndex = 14
+flingTitleLbl.Parent = flingCard
+
+local targetInput = Instance.new("TextBox")
+targetInput.Size = UDim2.new(1, -128, 0, 36)
+targetInput.Position = UDim2.new(0, 14, 0, 44)
+targetInput.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+targetInput.BorderSizePixel = 0
+targetInput.PlaceholderText = "Введите ник или часть..."
+targetInput.Text = ""
+targetInput.TextColor3 = THEME.TEXT_TITLE
+targetInput.PlaceholderColor3 = THEME.TEXT_MUTED
+targetInput.TextSize = 11
+targetInput.Font = Enum.Font.Gotham
+targetInput.ZIndex = 14
+targetInput.Parent = flingCard
+round(targetInput, 8)
+
+local flingBtn = Instance.new("TextButton")
+flingBtn.Size = UDim2.new(0, 100, 0, 36)
+flingBtn.AnchorPoint = Vector2.new(1, 0)
+flingBtn.Position = UDim2.new(1, -14, 0, 44)
+flingBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+flingBtn.BorderSizePixel = 0
+flingBtn.Text = "💥 ПИЗДА"
+flingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flingBtn.TextSize = 12
+flingBtn.Font = Enum.Font.GothamBold
+flingBtn.AutoButtonColor = false
+flingBtn.ZIndex = 14
+flingBtn.Parent = flingCard
+round(flingBtn, 8)
+clickAnim(flingBtn)
+
+local isFlinging = false
+flingBtn.Activated:Connect(function()
+    local query = targetInput.Text:lower()
+    if query == "" then return end
+    
+    local targetChar = nil
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and (p.Name:lower():sub(1, #query) == query or p.DisplayName:lower():sub(1, #query) == query) then
+            targetChar = p.Character
+            break
+        end
+    end
+    
+    if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then return end
+    
+    isFlinging = true
+    task.spawn(function()
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bv.Parent = hrp
+        
+        local t = 0
+        while isFlinging and targetChar and targetChar:FindFirstChild("HumanoidRootPart") and t < 3 do
+            local dt = RunService.RenderStepped:Wait()
+            t = t + dt
+            hrp.CFrame = targetChar.HumanoidRootPart.CFrame
+            bv.Velocity = Vector3.new(math.random(-50000, 50000), 50000, math.random(-50000, 50000))
+        end
+        
+        if bv then bv:Destroy() end
+        isFlinging = false
+    end)
+end)
+
 --------------------------------------------------------------------------------
--- 2️⃣ ПОЛЁТ НА КОРАБЛЕ (С регулировкой скорости и отключением прыжка)
+-- 🛶 РАЗДЕЛ 2: ПОСТРОЙ КОРАБЛЬ (Полёт на корабле + Скорость + Бинд)
 --------------------------------------------------------------------------------
 local boatFlyEnabled = false
-local boatSpeed = 120 -- Увеличена скорость по умолчанию
+local boatSpeed = 55
+local currentKeybind = Enum.KeyCode.RightShift
 
-createToggle(pages[2], "2. Полёт на Корабле", "Сядь в кресло: Пробел вверх, Ctrl вниз, без прыжков при полете", function(enabled)
-    boatFlyEnabled = enabled
+local boatFlyCard = Instance.new("Frame")
+boatFlyCard.Size = UDim2.new(1, -30, 0, 155)
+boatFlyCard.BackgroundColor3 = THEME.PANEL
+boatFlyCard.BorderSizePixel = 0
+boatFlyCard.ZIndex = 13
+boatFlyCard.Parent = pages[2]
+round(boatFlyCard, 10)
+stroke(boatFlyCard, THEME.BORDER, 1, 0.5)
+
+local boatTitleLbl = Instance.new("TextLabel")
+boatTitleLbl.Size = UDim2.new(1, -70, 0, 20)
+boatTitleLbl.Position = UDim2.new(0, 14, 0, 10)
+boatTitleLbl.BackgroundTransparency = 1
+boatTitleLbl.Text = "1. Полёт на Корабле"
+boatTitleLbl.TextColor3 = THEME.TEXT_TITLE
+boatTitleLbl.TextSize = 13
+boatTitleLbl.Font = Enum.Font.GothamBold
+boatTitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+boatTitleLbl.ZIndex = 14
+boatTitleLbl.Parent = boatFlyCard
+
+local boatSubLbl = Instance.new("TextLabel")
+boatSubLbl.Size = UDim2.new(1, -70, 0, 16)
+boatSubLbl.Position = UDim2.new(0, 14, 0, 30)
+boatSubLbl.BackgroundTransparency = 1
+boatSubLbl.Text = "Сядь в кресло: держит высоту"
+boatSubLbl.TextColor3 = THEME.TEXT_MUTED
+boatSubLbl.TextSize = 10
+boatSubLbl.Font = Enum.Font.Gotham
+boatSubLbl.TextXAlignment = Enum.TextXAlignment.Left
+boatSubLbl.ZIndex = 14
+boatSubLbl.Parent = boatFlyCard
+
+local boatSwitchBtn = Instance.new("TextButton")
+boatSwitchBtn.AnchorPoint = Vector2.new(1, 0)
+boatSwitchBtn.Position = UDim2.new(1, -14, 0, 14)
+boatSwitchBtn.Size = UDim2.new(0, 44, 0, 24)
+boatSwitchBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 70)
+boatSwitchBtn.BorderSizePixel = 0
+boatSwitchBtn.Text = ""
+boatSwitchBtn.AutoButtonColor = false
+boatSwitchBtn.ZIndex = 14
+boatSwitchBtn.Parent = boatFlyCard
+round(boatSwitchBtn, 12)
+
+local boatDot = Instance.new("Frame")
+boatDot.Position = UDim2.new(0, 3, 0.5, -9)
+boatDot.Size = UDim2.new(0, 18, 0, 18)
+boatDot.BackgroundColor3 = THEME.TEXT_MUTED
+boatDot.BorderSizePixel = 0
+boatDot.ZIndex = 15
+boatDot.Parent = boatSwitchBtn
+round(boatDot, 99)
+
+-- Текстовое поле ввода скорости
+local speedInputLabel = Instance.new("TextLabel")
+speedInputLabel.Size = UDim2.new(1, -28, 0, 16)
+speedInputLabel.Position = UDim2.new(0, 14, 0, 60)
+speedInputLabel.BackgroundTransparency = 1
+speedInputLabel.Text = "Введи скорость полета:"
+speedInputLabel.TextColor3 = THEME.TEXT_MUTED
+speedInputLabel.TextSize = 10
+speedInputLabel.Font = Enum.Font.GothamBold
+speedInputLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedInputLabel.ZIndex = 14
+speedInputLabel.Parent = boatFlyCard
+
+local speedTextBox = Instance.new("TextBox")
+speedTextBox.Size = UDim2.new(1, -28, 0, 36)
+speedTextBox.Position = UDim2.new(0, 14, 0, 80)
+speedTextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+speedTextBox.BorderSizePixel = 0
+speedTextBox.Text = tostring(boatSpeed)
+speedTextBox.TextColor3 = THEME.TEXT_ACCENT
+speedTextBox.PlaceholderColor3 = THEME.TEXT_MUTED
+speedTextBox.TextSize = 13
+speedTextBox.Font = Enum.Font.GothamBold
+speedTextBox.ZIndex = 14
+speedTextBox.Parent = boatFlyCard
+round(speedTextBox, 8)
+stroke(speedTextBox, THEME.BORDER, 1, 0.5)
+
+speedTextBox.FocusLost:Connect(function()
+    local num = tonumber(speedTextBox.Text)
+    if num then
+        boatSpeed = num
+    else
+        speedTextBox.Text = tostring(boatSpeed)
+    end
+end)
+
+boatSwitchBtn.Activated:Connect(function()
+    boatFlyEnabled = not boatFlyEnabled
+    local targetColor = boatFlyEnabled and THEME.SUCCESS or Color3.fromRGB(45, 45, 70)
+    local dotColor = boatFlyEnabled and Color3.new(1, 1, 1) or THEME.TEXT_MUTED
+    local dotPos = boatFlyEnabled and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+
+    TweenService:Create(boatSwitchBtn, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
+    TweenService:Create(boatDot, TweenInfo.new(0.2), {BackgroundColor3 = dotColor, Position = dotPos}):Play()
+
     if not boatFlyEnabled then return end
 
     task.spawn(function()
@@ -428,8 +559,6 @@ createToggle(pages[2], "2. Полёт на Корабле", "Сядь в кре�
             
             if seat then
                 local primaryPart = seat
-                
-                -- Отключаем прыжок у гуманоида, чтобы пробел поднимал вверх, а не дергал прыжком
                 local oldJumpPower = humanoid.JumpPower
                 local oldJumpHeight = humanoid.JumpHeight
                 humanoid.JumpPower = 0
@@ -446,39 +575,29 @@ createToggle(pages[2], "2. Полёт на Корабле", "Сядь в кре�
                 bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
                 bg.Parent = primaryPart
 
+                local bf = primaryPart:FindFirstChild("KairoAntiGravity") or Instance.new("BodyForce")
+                bf.Name = "KairoAntiGravity"
+                bf.Force = Vector3.new(0, primaryPart.AssemblyMass * Workspace.Gravity, 0)
+                bf.Parent = primaryPart
+
                 while boatFlyEnabled and seat.Parent and humanoid.SeatPart == seat do
                     local cam = Workspace.CurrentCamera
                     local moveDir = Vector3.new(0, 0, 0)
-                    
-                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                        moveDir = moveDir + cam.CFrame.LookVector
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                        moveDir = moveDir - cam.CFrame.LookVector
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                        moveDir = moveDir - cam.CFrame.RightVector
-                    end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                        moveDir = moveDir + cam.CFrame.RightVector
-                    end
-                    -- Пробел поднимает корабль вверх в абсолютных координатах мира
-                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                        moveDir = moveDir + Vector3.new(0, 1, 0)
-                    end
-                    -- Ctrl опускает вниз
-                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-                        moveDir = moveDir - Vector3.new(0, 1, 0)
-                    end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
 
                     bv.Velocity = moveDir * boatSpeed
                     bg.CFrame = cam.CFrame
                     RunService.RenderStepped:Wait()
                 end
 
-                -- Возвращаем настройки персонажу при отключении или выходе из кресла
                 if bv then bv:Destroy() end
                 if bg then bg:Destroy() end
+                if bf then bf:Destroy() end
                 if humanoid then
                     humanoid.JumpPower = oldJumpPower
                     humanoid.JumpHeight = oldJumpHeight
@@ -486,6 +605,61 @@ createToggle(pages[2], "2. Полёт на Корабле", "Сядь в кре�
                 end
             end
             task.wait(0.3)
+        end
+    end)
+end)
+
+-- Карточка настройки бинда меню (снизу во второй вкладке)
+local bindCard = Instance.new("Frame")
+bindCard.Size = UDim2.new(1, -30, 0, 75)
+bindCard.BackgroundColor3 = THEME.PANEL
+bindCard.BorderSizePixel = 0
+bindCard.ZIndex = 13
+bindCard.Parent = pages[2]
+round(bindCard, 10)
+stroke(bindCard, THEME.BORDER, 1, 0.5)
+
+local bindTitleLbl = Instance.new("TextLabel")
+bindTitleLbl.Size = UDim2.new(1, -20, 0, 20)
+bindTitleLbl.Position = UDim2.new(0, 14, 0, 10)
+bindTitleLbl.BackgroundTransparency = 1
+bindTitleLbl.Text = "2. Бинд клавиши меню"
+bindTitleLbl.TextColor3 = THEME.TEXT_TITLE
+bindTitleLbl.TextSize = 13
+bindTitleLbl.Font = Enum.Font.GothamBold
+bindTitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+bindTitleLbl.ZIndex = 14
+bindTitleLbl.Parent = bindCard
+
+local bindBtn = Instance.new("TextButton")
+bindBtn.Size = UDim2.new(1, -28, 0, 32)
+bindBtn.Position = UDim2.new(0, 14, 0, 34)
+bindBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+bindBtn.BorderSizePixel = 0
+bindBtn.Text = "Клавиша: RightShift (нажми чтобы изменить)"
+bindBtn.TextColor3 = THEME.TEXT_ACCENT
+bindBtn.TextSize = 11
+bindBtn.Font = Enum.Font.GothamBold
+bindBtn.AutoButtonColor = false
+bindBtn.ZIndex = 14
+bindBtn.Parent = bindCard
+round(bindBtn, 8)
+stroke(bindBtn, THEME.BORDER, 1, 0.5)
+clickAnim(bindBtn)
+
+local isListeningForKey = false
+bindBtn.Activated:Connect(function()
+    if isListeningForKey then return end
+    isListeningForKey = true
+    bindBtn.Text = "Нажми любую клавишу..."
+    
+    local connection
+    connection = UserInputService.InputBegan:Connect(function(input, gpe)
+        if input.UserInputType == Enum.UserInputType.Keyboard then
+            currentKeybind = input.KeyCode
+            bindBtn.Text = "Клавиша: " .. tostring(currentKeybind.Name) .. " (нажми чтобы изменить)"
+            isListeningForKey = false
+            connection:Disconnect()
         end
     end)
 end)
@@ -592,10 +766,7 @@ local function selectTab(idx)
 end
 
 for idx, t in ipairs(tabBtns) do
-    t.btn.Activated:Connect(function()
-        selectTab(idx)
-    end)
-
+    t.btn.Activated:Connect(function() selectTab(idx) end)
     t.btn.MouseEnter:Connect(function()
         if activeTab ~= idx then
             TweenService:Create(t.icon, TweenInfo.new(0.15), {TextColor3 = THEME.TEXT_TITLE}):Play()
@@ -603,9 +774,7 @@ for idx, t in ipairs(tabBtns) do
         end
     end)
     t.btn.MouseLeave:Connect(function()
-        if activeTab ~= idx then
-            setTabColors(idx, false)
-        end
+        if activeTab ~= idx then setTabColors(idx, false) end
     end)
 end
 
@@ -619,29 +788,16 @@ local function setMenuVisible(visible)
         TweenService:Create(mainScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
     else
         local t = TweenService:Create(mainScale, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.85})
-        t.Completed:Once(function()
-            mainFrame.Visible = false
-        end)
+        t.Completed:Once(function() mainFrame.Visible = false end)
         t:Play()
     end
 end
 
-closeBtn.Activated:Connect(function()
-    setMenuVisible(false)
-end)
+closeBtn.Activated:Connect(function() setMenuVisible(false) end)
 
 UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
+    if not gpe and not isListeningForKey and input.KeyCode == currentKeybind then
         setMenuVisible(not mainFrame.Visible)
-    end
-end)
-
-task.spawn(function()
-    while screenGui.Parent do
-        local a = TweenService:Create(mainStroke, TweenInfo.new(2, Enum.EasingStyle.Sine), {Thickness = 2.2})
-        a:Play(); a.Completed:Wait()
-        local b = TweenService:Create(mainStroke, TweenInfo.new(2, Enum.EasingStyle.Sine), {Thickness = 1.5})
-        b:Play(); b.Completed:Wait()
     end
 end)
 
