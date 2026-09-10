@@ -1,6 +1,5 @@
-
 -- ============================================================================
--- ✨ KAIROTECH HUB — v7.4 (FIXED FOG, BUTTONS & TOGGLES)
+-- ✨ KAIROTECH HUB — v7.5 (LUA ROBLOX FIX & WINDOWS SAFE)
 -- ============================================================================
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
@@ -143,7 +142,7 @@ local loadTitle = Instance.new("TextLabel")
 loadTitle.Size = UDim2.new(1, 0, 0, 30)
 loadTitle.Position = UDim2.new(0, 0, 0, 24)
 loadTitle.BackgroundTransparency = 1
-loadTitle.Text = "⚡ KAIROTECH HUB v7.4"
+loadTitle.Text = "⚡ KAIROTECH HUB v7.5"
 loadTitle.TextColor3 = Color3.new(1, 1, 1)
 loadTitle.TextSize = 18
 loadTitle.Font = Enum.Font.GothamBold
@@ -208,15 +207,22 @@ mainFrame.Parent = screenGui
 round(mainFrame, 16)
 stroke(mainFrame, THEME.BORDER, 1.5, 0)
 
--- Перетаскивание
+-- Перетаскивание (исправленная логика без залипания под Windows)
 local dragging, dragInput, dragStart, startPos
 mainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = mainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        
+        local connection
+        connection = input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+                if connection then
+                    connection:Disconnect()
+                end
+            end
         end)
     end
 end)
@@ -260,7 +266,7 @@ local brandSub = Instance.new("TextLabel")
 brandSub.Size = UDim2.new(1, 0, 0, 14)
 brandSub.Position = UDim2.new(0, 0, 0, 30)
 brandSub.BackgroundTransparency = 1
-brandSub.Text = "v7.4 Ultimate"
+brandSub.Text = "v7.5 Ultimate"
 brandSub.TextColor3 = THEME.TEXT_MUTED
 brandSub.TextSize = 9
 brandSub.Font = Enum.Font.Gotham
@@ -570,7 +576,7 @@ local function setPlayerFlyActive(state)
     end)
 end
 
-createToggle(pages[1], "Полёт Игрока (Fly)", "Свободный полет (Клавиша F)", function(enabled)
+createToggle(pages[1], "Полёт Игрока (Fly)", "Свободный полет (Клавиши W, A, S, D)", function(enabled)
     setPlayerFlyActive(enabled)
 end)
 
@@ -609,7 +615,7 @@ end)
 local boatFlyEnabled = false
 local boatSpeed = 75
 
-createToggle(pages[2], "Полет на Корабле / Транспорте", "Поворот за камерой (Клавиша E)", function(enabled)
+createToggle(pages[2], "Полет на Корабле / Транспорте", "Поворот за камерой (Клавиши движения)", function(enabled)
     boatFlyEnabled = enabled
 end)
 
@@ -715,14 +721,12 @@ end)
 --------------------------------------------------------------------------------
 -- ⚙️ ВКЛАДКА 4: НАСТРОЙКИ (ФОГ, ТЕМЫ И ФУНКЦИИ)
 --------------------------------------------------------------------------------
--- Исправленный туман через FogEnd / FogStart и включение Atmosphere
 createToggle(pages[4], "Плотный Туман (Fog)", "Кинематографичный туман в игре", function(enabled)
     if enabled then
         Lighting.FogEnd = 300
         Lighting.FogStart = 10
         Lighting.FogColor = Color3.fromRGB(150, 150, 180)
         
-        -- Также проверяем и включаем Atmosphere для красивого тумана если он есть в игре
         local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
         if not atmosphere then
             atmosphere = Instance.new("Atmosphere")
@@ -776,7 +780,7 @@ createButton(pages[4], "Тема: Матрица", "Установить хак�
 end)
 
 createButton(pages[4], "Тема: Глубокая Ночь", "Установить темную синюю тему", function()
-    currentThemeKey = "DarkMidnight"
+    currentThreadKey = "DarkMidnight"
     THEME = THEMES[currentThemeKey]
     mainFrame.BackgroundColor3 = THEME.BG
     sidebar.BackgroundColor3 = THEME.SIDEBAR
@@ -825,5 +829,5 @@ task.spawn(function()
     loadingFrame:Destroy()
     
     mainFrame.Visible = true
-    print("✨ KairoTech Hub v7.4 запущен! Нажми RightShift для скрытия/показа меню.")
+    print("✨ KairoTech Hub v7.5 запущен! Нажми RightShift для скрытия/показа меню.")
 end)
